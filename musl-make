@@ -1,0 +1,7 @@
+#!/bin/sh
+
+set -e
+
+export RUNCRON_CFLAGS="-g -Wall -fwrapv -pedantic -no-pie"
+export CC="musl-gcc -static -Os"
+exec make $@
