@@ -245,8 +245,8 @@ int main(int argc, char *argv[]) {
       alarm(timeout);
     }
     if (waitfor(&status) < 0) {
-      exit_value = 111;
-      goto RUNLOCK_EXIT;
+      (void)kill(pid * -1, default_signal);
+      exit(111);
     }
   }
 
@@ -255,7 +255,6 @@ int main(int argc, char *argv[]) {
   else if (WIFSIGNALED(status))
     exit_value = 128 + WTERMSIG(status);
 
-RUNLOCK_EXIT:
   VERBOSE(3, "status=%d exit_value=%d\n", status, exit_value);
 
   if (write_exit_status(fd, exit_value) < 0)
