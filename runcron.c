@@ -193,7 +193,7 @@ int main(int argc, char *argv[]) {
     }
   } else {
     if (seconds == UINT32_MAX) {
-      status = 1;
+      status = 255;
       seconds = 0;
     }
     if (write_exit_status(fd, status) < 0)
@@ -235,7 +235,7 @@ int main(int argc, char *argv[]) {
       err(111, "setpgid");
 
     (void)execvp(argv[0], argv);
-    exit(111);
+    exit(127);
   default:
     if (signal_init() < 0) {
       (void)kill(pid * -1, default_signal);
