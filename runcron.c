@@ -12,30 +12,15 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-#define _XOPEN_SOURCE 700
-#define _XOPEN_SOURCE_EXTENDED 1
-#define _DEFAULT_SOURCE
-#include <sys/time.h>
-#include <time.h>
+#include "runcron.h"
 
-#include <ctype.h>
-#include <err.h>
-#include <errno.h>
 #include <fcntl.h>
 #include <getopt.h>
 #include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <sys/file.h>
 #include <sys/param.h>
 #include <sys/stat.h>
-#include <sys/types.h>
 #include <sys/wait.h>
-#include <unistd.h>
-
-#include "ccronexpr.h"
-#include "runcron.h"
 
 #define RUNCRON_VERSION "0.2.0"
 
@@ -46,14 +31,7 @@
     }                                                                          \
   } while (0)
 
-static unsigned int cronevent(char *cronentry, time_t now, int verbose);
 static time_t timestamp(const char *s);
-static int fields(const char *s);
-static int arg_to_timespec(const char *arg, size_t arglen, char *buf,
-                           size_t buflen);
-static const char *alias_to_timespec(const char *alias);
-static void usage();
-
 static int read_exit_status(int fd, int *status);
 static int write_exit_status(int fd, int status);
 void sleepfor(unsigned int seconds);
@@ -63,21 +41,6 @@ void signal_handler(int sig);
 static void usage();
 
 extern char *__progname;
-
-static struct runcron_alias {
-  const char *name;
-  const char *timespec;
-} runcron_aliases[] = {{"@yearly", "0 0 0 1 1 *"},
-                       {"@annually", "0 0 0 1 1 *"},
-                       {"@monthly", "0 0 0 1 * *"},
-                       {"@weekly", "0 0 0 * * 0"},
-                       {"@daily", "0 0 0 * * *"},
-                       {"@midnight", "0 0 0 * * *"},
-                       {"@hourly", "0 0 * * * *"},
-
-                       {"@reboot", "@reboot"},
-
-                       {NULL, NULL}};
 
 enum {
   OPT_TIMESTAMP = 1,
@@ -94,7 +57,8 @@ static const struct option long_options[] = {
     {"timestamp", required_argument, NULL, OPT_TIMESTAMP},
     {"verbose", no_argument, NULL, 'v'},
     {"help", no_argument, NULL, 'h'},
-    {NULL, 0, NULL, 0}};
+    {NULL, 0, NULL, 0},
+};
 
 pid_t pid;
 int default_signal = SIGTERM;
@@ -263,55 +227,26 @@ int main(int argc, char *argv[]) {
   exit(exit_value);
 }
 
-static unsigned int cronevent(char *cronentry, time_t now, int verbose) {
-  cron_expr expr = {0};
-  const char *errbuf = NULL;
-  char buf[255] = {0};
-  char arg[252] = {0};
-  char *p;
-  time_t next;
-  double diff;
-  int rv;
+static time_t timestamp(const char *s) {
+  struct tm tm = {0};
 
-  rv = snprintf(arg, sizeof(arg), "%s", cronentry);
-  if (rv < 0 || rv >= sizeof(arg))
-    errx(EXIT_FAILURE, "error: timespec exceeds maximum length: %zu",
-         sizeof(arg));
+  switch (s[0]) {
+  case '@':
+    if (strptime(s + 1, "%s", &tm) == NULL)
+      return -1;
 
-  /* replace tabs with spaces */
-  for (p = arg; *p != '\0'; p++)
-    if (isspace(*p))
-      *p = ' ';
+    break;
 
-  if (arg_to_timespec(arg, sizeof(arg), buf, sizeof(buf)) < 0)
-    errx(EXIT_FAILURE, "error: invalid crontab timespec");
+  default:
+    if (strptime(s, "%Y-%m-%d %T", &tm) == NULL)
+      return -1;
 
-  if (verbose > 1)
-    (void)fprintf(stderr, "crontab=%s\n", buf);
-
-  if (strcmp(buf, "@reboot") == 0) {
-    return UINT32_MAX;
+    break;
   }
 
-  cron_parse_expr(buf, &expr, &errbuf);
-  if (errbuf)
-    errx(EXIT_FAILURE, "error: invalid crontab timespec: %s", errbuf);
+  tm.tm_isdst = -1;
 
-  next = cron_next(&expr, now);
-  if (next == -1)
-    errx(EXIT_FAILURE, "error: cron_next: next scheduled interval: %s",
-         errno == 0 ? "invalid timespec" : strerror(errno));
-
-  if (verbose > 0) {
-    (void)fprintf(stderr, "now[%lld]=%s", (long long)now, ctime(&now));
-    (void)fprintf(stderr, "next[%lld]=%s", (long long)next, ctime(&next));
-  }
-
-  diff = difftime(next, now);
-  if (diff < 0)
-    errx(EXIT_FAILURE, "error: difftime: negative duration: %.f seconds", diff);
-
-  return diff > UINT32_MAX ? UINT32_MAX : (unsigned int)diff;
+  return mktime(&tm);
 }
 
 void sleepfor(unsigned int seconds) {
@@ -356,90 +291,6 @@ int signal_init() {
   }
 
   return 0;
-}
-
-static int fields(const char *s) {
-  int n = 0;
-  const char *p = s;
-  int field = 0;
-
-  for (; *p != '\0'; p++) {
-    if (*p != ' ') {
-      if (!field) {
-        n++;
-        field = 1;
-      }
-    } else {
-      field = 0;
-    }
-  }
-
-  return n;
-}
-
-static int arg_to_timespec(const char *arg, size_t arglen, char *buf,
-                           size_t buflen) {
-  const char *timespec;
-  int n;
-  int rv;
-
-  n = fields(arg);
-
-  switch (n) {
-  case 1:
-    timespec = alias_to_timespec(arg);
-
-    if (timespec == NULL)
-      return -1;
-
-    rv = snprintf(buf, buflen, "%s", timespec);
-    break;
-
-  case 5:
-    rv = snprintf(buf, buflen, "0 %s", arg);
-    break;
-
-  case 6:
-  default:
-    rv = snprintf(buf, buflen, "%s", arg);
-    break;
-  }
-
-  return (rv < 0 || rv >= buflen) ? -1 : 0;
-}
-
-static time_t timestamp(const char *s) {
-  struct tm tm = {0};
-
-  switch (s[0]) {
-  case '@':
-    if (strptime(s + 1, "%s", &tm) == NULL)
-      return -1;
-
-    break;
-
-  default:
-    if (strptime(s, "%Y-%m-%d %T", &tm) == NULL)
-      return -1;
-
-    break;
-  }
-
-  tm.tm_isdst = -1;
-
-  return mktime(&tm);
-}
-
-static const char *alias_to_timespec(const char *name) {
-  struct runcron_alias *ap;
-
-  for (ap = runcron_aliases; ap->name != NULL; ap++) {
-    if (strcmp(name, ap->name) == 0) {
-      return ap->timespec;
-    }
-  }
-
-  return NULL;
 }
 
 static int write_exit_status(int fd, int status) {

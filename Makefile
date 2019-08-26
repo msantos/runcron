@@ -2,6 +2,7 @@
 
 PROG=   runcron
 SRCS=   runcron.c \
+        cronevent.c \
         ccronexpr.c \
         strtonum.c
 
