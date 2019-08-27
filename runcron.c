@@ -148,12 +148,12 @@ int main(int argc, char *argv[]) {
     case EEXIST:
       fd = open(file, O_RDWR | O_CLOEXEC, 0);
       if (fd < 0)
-        err(111, "open");
+        err(111, "open: %s", file);
       if (read_exit_status(fd, &status) < 0)
-        err(111, "read_exit_status");
+        err(111, "read_exit_status: %s", file);
       break;
     default:
-      err(111, "open");
+      err(111, "open: %s", file);
     }
   } else {
     if (seconds == UINT32_MAX) {
@@ -161,7 +161,7 @@ int main(int argc, char *argv[]) {
       seconds = 0;
     }
     if (write_exit_status(fd, status) < 0)
-      err(111, "write_exit_status");
+      err(111, "write_exit_status: %s", file);
   }
 
   if (!(opt & OPT_DRYRUN) && (flock(fd, LOCK_EX | LOCK_NB) < 0))
@@ -222,7 +222,7 @@ int main(int argc, char *argv[]) {
   VERBOSE(3, "status=%d exit_value=%d\n", status, exit_value);
 
   if (write_exit_status(fd, exit_value) < 0)
-    err(111, "write_exit_status");
+    err(111, "write_exit_status: %s", file);
 
   exit(exit_value);
 }
