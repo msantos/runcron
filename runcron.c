@@ -79,6 +79,9 @@ int main(int argc, char *argv[]) {
   int verbose = 0;
   int ch;
 
+  if (setvbuf(stdout, NULL, _IOLBF, 0) < 0)
+    err(EXIT_FAILURE, "setvbuf");
+
   now = time(NULL);
   if (now == -1)
     err(EXIT_FAILURE, "time");
@@ -180,8 +183,9 @@ int main(int argc, char *argv[]) {
     timeout = cronevent(cronentry, now + seconds, verbose);
   }
 
-  VERBOSE(1, "last exit status was %d, sleep interval is %ds, command timeout "
-             "is %ds\n",
+  VERBOSE(1,
+          "last exit status was %d, sleep interval is %ds, command timeout "
+          "is %ds\n",
           status, seconds, timeout);
 
   if (opt & OPT_DRYRUN)
