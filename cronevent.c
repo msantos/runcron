@@ -13,6 +13,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 #include "runcron.h"
+#include "restrict_process.h"
 
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -64,12 +65,14 @@ unsigned int cronevent(char *cronentry, time_t now, int verbose) {
 
   case 0:
     (void)close(sv[0]);
+    if (restrict_process() < 0)
+      exit(111);
     exit_value = cronexpr(cronentry, &seconds, now, verbose);
     if (exit_value < 0)
-      exit(-exit_value);
+      _exit(-exit_value);
     if (write(sv[1], &seconds, sizeof(seconds)) != sizeof(seconds))
-      exit(111);
-    exit(0);
+      _exit(111);
+    _exit(0);
 
   default:
     (void)close(sv[1]);

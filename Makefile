@@ -4,7 +4,8 @@ PROG=   runcron
 SRCS=   runcron.c \
         cronevent.c \
         ccronexpr.c \
-        strtonum.c
+        strtonum.c \
+        restrict_process_seccomp.c
 
 UNAME_SYS := $(shell uname -s)
 ifeq ($(UNAME_SYS), Linux)
@@ -13,21 +14,21 @@ ifeq ($(UNAME_SYS), Linux)
               -pie -fPIE \
               -fno-strict-aliasing
     LDFLAGS += -Wl,-z,relro,-z,now -Wl,-z,noexecstack
-	  RUNCRON_SANDBOX ?= seccomp
+	  RESTRICT_PROCESS ?= seccomp
 else ifeq ($(UNAME_SYS), OpenBSD)
     CFLAGS ?= -D_FORTIFY_SOURCE=2 -O2 -fstack-protector-strong \
               -Wformat -Werror=format-security \
               -pie -fPIE \
               -fno-strict-aliasing
     LDFLAGS += -Wno-missing-braces -Wl,-z,relro,-z,now -Wl,-z,noexecstack
-    RUNCRON_SANDBOX ?= pledge
+    RESTRICT_PROCESS ?= pledge
 else ifeq ($(UNAME_SYS), FreeBSD)
     CFLAGS ?= -D_FORTIFY_SOURCE=2 -O2 -fstack-protector-strong \
               -Wformat -Werror=format-security \
               -pie -fPIE \
               -fno-strict-aliasing
     LDFLAGS += -Wno-missing-braces -Wl,-z,relro,-z,now -Wl,-z,noexecstack
-    RUNCRON_SANDBOX ?= capsicum
+    RESTRICT_PROCESS ?= capsicum
 else ifeq ($(UNAME_SYS), Darwin)
     CFLAGS ?= -D_FORTIFY_SOURCE=2 -O2 -fstack-protector-strong \
               -Wformat -Werror=format-security \
@@ -38,13 +39,13 @@ endif
 
 RM ?= rm
 
-RUNCRON_SANDBOX ?= rlimit
+RESTRICT_PROCESS ?= rlimit
 RUNCRON_CFLAGS ?= -g -Wall -fwrapv -pedantic
 
 CFLAGS += $(RUNCRON_CFLAGS) \
           -DCRON_USE_LOCAL_TIME \
-          -DRUNCRON_SANDBOX=\"$(RUNCRON_SANDBOX)\" \
-          -DRUNCRON_SANDBOX_$(RUNCRON_SANDBOX)
+          -DRESTRICT_PROCESS=\"$(RESTRICT_PROCESS)\" \
+          -DRESTRICT_PROCESS_$(RESTRICT_PROCESS)
 
 LDFLAGS += $(RUNCRON_LDFLAGS)
 

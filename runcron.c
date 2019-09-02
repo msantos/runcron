@@ -159,6 +159,7 @@ int main(int argc, char *argv[]) {
       err(111, "open: %s", file);
     }
   } else {
+    /* @reboot */
     if (seconds == UINT32_MAX) {
       status = 255;
       seconds = 0;
