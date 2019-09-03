@@ -5,6 +5,7 @@ SRCS=   runcron.c \
         cronevent.c \
         ccronexpr.c \
         strtonum.c \
+        restrict_process_null.c \
         restrict_process_seccomp.c
 
 UNAME_SYS := $(shell uname -s)

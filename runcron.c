@@ -328,7 +328,7 @@ static int read_exit_status(int fd, int *status) {
 static void usage() {
   errx(EXIT_FAILURE,
        "[OPTION] <CRONTAB EXPRESSION> <command> <arg> <...>\n"
-       "version: %s\n\n"
+       "version: %s (using %s mode process restriction)\n\n"
        "-f, --file             lock file path (default: .runcron.lock)\n"
        "-T, --timeout          specify command timeout (seconds)\n"
        "-P, --poll-interval    interval to retry failed commands (default: "
@@ -338,5 +338,5 @@ static void usage() {
        "-v, --verbose          verbose mode\n"
        "    --timestamp <YY-MM-DD hh-mm-ss|@epoch>\n"
        "                       provide an initial time\n",
-       RUNCRON_VERSION);
+       RUNCRON_VERSION, RESTRICT_PROCESS);
 }
