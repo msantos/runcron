@@ -24,13 +24,6 @@
 
 #define RUNCRON_VERSION "0.2.0"
 
-#define VERBOSE(__n, ...)                                                      \
-  do {                                                                         \
-    if (verbose >= __n) {                                                      \
-      (void)fprintf(stderr, __VA_ARGS__);                                      \
-    }                                                                          \
-  } while (0)
-
 static time_t timestamp(const char *s);
 static int read_exit_status(int fd, int *status);
 static int write_exit_status(int fd, int status);
@@ -42,12 +35,6 @@ static void usage();
 
 extern char *__progname;
 
-enum {
-  OPT_TIMESTAMP = 1,
-  OPT_PRINT = 2,
-  OPT_DRYRUN = 4,
-};
-
 static const struct option long_options[] = {
     {"file", required_argument, NULL, 'f'},
     {"timeout", required_argument, NULL, 'T'},
@@ -55,6 +42,8 @@ static const struct option long_options[] = {
     {"dryrun", no_argument, NULL, 'n'},
     {"print", no_argument, NULL, 'p'},
     {"timestamp", required_argument, NULL, OPT_TIMESTAMP},
+    {"disable-process-restrictions", no_argument, NULL,
+     OPT_DISABLE_PROCESS_RESTRICTIONS},
     {"verbose", no_argument, NULL, 'v'},
     {"help", no_argument, NULL, 'h'},
     {NULL, 0, NULL, 0},
@@ -64,20 +53,25 @@ pid_t pid;
 int default_signal = SIGTERM;
 
 int main(int argc, char *argv[]) {
+  runcron_t *rp;
   char *file = ".runcron.lock";
   char *cronentry;
   int fd;
   int status = 0;
   time_t now;
   unsigned int seconds;
-  int32_t timeout = 0;
+  unsigned int timeout = 0;
   int32_t poll_interval = 3600; /* 1 hour */
   const char *errstr = NULL;
   int exit_value = 0;
 
-  int opt = 0;
   int verbose = 0;
   int ch;
+
+  rp = calloc(1, sizeof(runcron_t));
+
+  if (rp == NULL)
+    err(EXIT_FAILURE, "calloc");
 
   if (setvbuf(stdout, NULL, _IOLBF, 0) < 0)
     err(EXIT_FAILURE, "setvbuf");
@@ -96,11 +90,11 @@ int main(int argc, char *argv[]) {
       break;
 
     case 'n':
-      opt |= OPT_DRYRUN;
+      rp->opt |= OPT_DRYRUN;
       break;
 
     case 'p':
-      opt |= OPT_PRINT;
+      rp->opt |= OPT_PRINT;
       break;
 
     case 'P':
@@ -110,7 +104,7 @@ int main(int argc, char *argv[]) {
       break;
 
     case 'T':
-      timeout = strtonum(optarg, INT_MIN, INT_MAX, &errstr);
+      timeout = strtonum(optarg, 0, UINT32_MAX, &errstr);
       if (errno)
         err(EXIT_FAILURE, "strtonum: %s: %s", optarg, errstr);
       break;
@@ -123,6 +117,10 @@ int main(int argc, char *argv[]) {
       now = timestamp(optarg);
       if (now == -1)
         errx(EXIT_FAILURE, "error: invalid timestamp: %s", optarg);
+      break;
+
+    case OPT_DISABLE_PROCESS_RESTRICTIONS:
+      rp->opt |= OPT_DISABLE_PROCESS_RESTRICTIONS;
       break;
 
     case 'h':
@@ -142,7 +140,8 @@ int main(int argc, char *argv[]) {
   argc--;
   argv++;
 
-  seconds = cronevent(cronentry, now, verbose);
+  if (cronevent(rp, cronentry, &seconds, now) < 0)
+    exit(1);
 
   fd = open(file, O_RDWR | O_CREAT | O_EXCL | O_CLOEXEC, 0600);
 
@@ -168,7 +167,7 @@ int main(int argc, char *argv[]) {
       err(111, "write_exit_status: %s", file);
   }
 
-  if (!(opt & OPT_DRYRUN) && (flock(fd, LOCK_EX | LOCK_NB) < 0))
+  if (!(rp->opt & OPT_DRYRUN) && (flock(fd, LOCK_EX | LOCK_NB) < 0))
     exit(111);
 
   if (status != 0) {
@@ -177,19 +176,22 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  if (opt & OPT_PRINT)
+  if (rp->opt & OPT_PRINT)
     (void)printf("%lu\n", (long unsigned int)seconds);
 
   if (timeout == 0) {
-    timeout = cronevent(cronentry, now + seconds, verbose);
+    if (cronevent(rp, cronentry, &timeout, now + seconds) < 0)
+      exit(1);
   }
 
-  VERBOSE(1,
-          "last exit status was %d, sleep interval is %ds, command timeout "
-          "is %ds\n",
-          status, seconds, timeout);
+  if (rp->verbose >= 1)
+    (void)fprintf(
+        stderr,
+        "last exit status was %d, sleep interval is %ds, command timeout "
+        "is %ds\n",
+        status, seconds, timeout);
 
-  if (opt & OPT_DRYRUN)
+  if (rp->opt & OPT_DRYRUN)
     exit(0);
 
   sleepfor(seconds);
@@ -209,7 +211,9 @@ int main(int argc, char *argv[]) {
     if (signal_init() < 0) {
       (void)kill(pid * -1, default_signal);
     }
-    VERBOSE(1, "running command: timeout is set to %ds\n", timeout);
+    if (rp->verbose >= 1)
+      (void)fprintf(stderr, "running command: timeout is set to %ds\n",
+                    timeout);
     if (timeout > 0) {
       alarm(timeout);
     }
@@ -224,7 +228,8 @@ int main(int argc, char *argv[]) {
   else if (WIFSIGNALED(status))
     exit_value = 128 + WTERMSIG(status);
 
-  VERBOSE(3, "status=%d exit_value=%d\n", status, exit_value);
+  if (rp->verbose >= 3)
+    (void)fprintf(stderr, "status=%d exit_value=%d\n", status, exit_value);
 
   if (write_exit_status(fd, exit_value) < 0)
     err(111, "write_exit_status: %s", file);
@@ -337,6 +342,7 @@ static void usage() {
        "-p, --print            output seconds to next timespec\n"
        "-v, --verbose          verbose mode\n"
        "    --timestamp <YY-MM-DD hh-mm-ss|@epoch>\n"
-       "                       provide an initial time\n",
+       "    --disable-process-restrictions\n"
+       "                       do not fork cron expression processing\n",
        RUNCRON_VERSION, RESTRICT_PROCESS);
 }

@@ -13,6 +13,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 #include "runcron.h"
+
 #include "restrict_process.h"
 
 #include <sys/socket.h>
@@ -21,8 +22,10 @@
 
 #include "ccronexpr.h"
 
-static int cronexpr(char *cronentry, unsigned int *seconds, time_t now,
-                    int verbose);
+static int cronexpr_proc(runcron_t *rp, char *cronentry, unsigned int *seconds,
+                         time_t now);
+static int cronexpr(runcron_t *rp, char *cronentry, unsigned int *seconds,
+                    time_t now);
 static int fields(const char *s);
 static int arg_to_timespec(const char *arg, size_t arglen, char *buf,
                            size_t buflen);
@@ -45,7 +48,15 @@ static struct runcron_alias {
     {NULL, NULL},
 };
 
-unsigned int cronevent(char *cronentry, time_t now, int verbose) {
+int cronevent(runcron_t *rp, char *cronentry, unsigned int *seconds,
+              time_t now) {
+  return rp->opt & OPT_DISABLE_PROCESS_RESTRICTIONS
+             ? cronexpr(rp, cronentry, seconds, now)
+             : cronexpr_proc(rp, cronentry, seconds, now);
+}
+
+static int cronexpr_proc(runcron_t *rp, char *cronentry, unsigned int *sec,
+                         time_t now) {
   pid_t pid;
   int sv[2];
   unsigned int seconds;
@@ -53,7 +64,7 @@ unsigned int cronevent(char *cronentry, time_t now, int verbose) {
   int exit_value = 0;
 
   if (socketpair(AF_UNIX, SOCK_STREAM, 0, sv) < 0)
-    exit(111);
+    return -1;
 
   pid = fork();
 
@@ -61,15 +72,15 @@ unsigned int cronevent(char *cronentry, time_t now, int verbose) {
   case -1:
     (void)close(sv[0]);
     (void)close(sv[1]);
-    exit(111);
+    return -1;
 
   case 0:
     (void)close(sv[0]);
     if (restrict_process() < 0)
       exit(111);
-    exit_value = cronexpr(cronentry, &seconds, now, verbose);
+    exit_value = cronexpr(rp, cronentry, &seconds, now);
     if (exit_value < 0)
-      _exit(-exit_value);
+      _exit(1);
     if (write(sv[1], &seconds, sizeof(seconds)) != sizeof(seconds))
       _exit(111);
     _exit(0);
@@ -78,7 +89,7 @@ unsigned int cronevent(char *cronentry, time_t now, int verbose) {
     (void)close(sv[1]);
 
     if (wait(&status) < 0)
-      exit(111);
+      return -1;
 
     if (WIFEXITED(status))
       exit_value = WEXITSTATUS(status);
@@ -86,19 +97,21 @@ unsigned int cronevent(char *cronentry, time_t now, int verbose) {
       exit_value = 128 + WTERMSIG(status);
 
     if (exit_value != 0)
-      exit(exit_value);
+      return -1;
 
     if (read(sv[0], &seconds, sizeof(seconds)) != sizeof(seconds))
-      exit(111);
+      return -1;
+
+    *sec = seconds;
 
     (void)close(sv[0]);
   }
 
-  return seconds;
+  return 0;
 }
 
-static int cronexpr(char *cronentry, unsigned int *seconds, time_t now,
-                    int verbose) {
+static int cronexpr(runcron_t *rp, char *cronentry, unsigned int *seconds,
+                    time_t now) {
   cron_expr expr = {0};
   const char *errbuf = NULL;
   char buf[255] = {0};
@@ -111,7 +124,7 @@ static int cronexpr(char *cronentry, unsigned int *seconds, time_t now,
   rv = snprintf(arg, sizeof(arg), "%s", cronentry);
   if (rv < 0 || rv >= sizeof(arg)) {
     warnx("error: timespec exceeds maximum length: %zu", sizeof(arg));
-    return -EXIT_FAILURE;
+    return -1;
   }
 
   /* replace tabs with spaces */
@@ -121,10 +134,10 @@ static int cronexpr(char *cronentry, unsigned int *seconds, time_t now,
 
   if (arg_to_timespec(arg, sizeof(arg), buf, sizeof(buf)) < 0) {
     warnx("error: invalid crontab timespec");
-    return -EXIT_FAILURE;
+    return -1;
   }
 
-  if (verbose > 1)
+  if (rp->verbose > 1)
     (void)fprintf(stderr, "crontab=%s\n", buf);
 
   if (strcmp(buf, "@reboot") == 0) {
@@ -135,17 +148,17 @@ static int cronexpr(char *cronentry, unsigned int *seconds, time_t now,
   cron_parse_expr(buf, &expr, &errbuf);
   if (errbuf) {
     warnx("error: invalid crontab timespec: %s", errbuf);
-    return -EXIT_FAILURE;
+    return -1;
   }
 
   next = cron_next(&expr, now);
   if (next == -1) {
     warnx("error: cron_next: next scheduled interval: %s",
           errno == 0 ? "invalid timespec" : strerror(errno));
-    return -EXIT_FAILURE;
+    return -1;
   }
 
-  if (verbose > 0) {
+  if (rp->verbose > 0) {
     (void)fprintf(stderr, "now[%lld]=%s", (long long)now, ctime(&now));
     (void)fprintf(stderr, "next[%lld]=%s", (long long)next, ctime(&next));
   }
@@ -153,7 +166,7 @@ static int cronexpr(char *cronentry, unsigned int *seconds, time_t now,
   diff = difftime(next, now);
   if (diff < 0) {
     warnx("error: difftime: negative duration: %.f seconds", diff);
-    return -EXIT_FAILURE;
+    return -1;
   }
 
   *seconds = diff > UINT32_MAX ? UINT32_MAX : (unsigned int)diff;

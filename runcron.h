@@ -13,9 +13,22 @@
 #include <time.h>
 #include <unistd.h>
 
+typedef struct {
+  int opt;
+  int verbose;
+} runcron_t;
+
+enum {
+  OPT_TIMESTAMP = 1,
+  OPT_PRINT = 2,
+  OPT_DRYRUN = 4,
+  OPT_DISABLE_PROCESS_RESTRICTIONS = 4,
+};
+
 #ifndef HAVE_STRTONUM
 long long strtonum(const char *numstr, long long minval, long long maxval,
                    const char **errstrp);
 #endif
 
-unsigned int cronevent(char *cronentry, time_t now, int verbose);
+int cronevent(runcron_t *rp, char *cronentry, unsigned int *seconds,
+              time_t now);
