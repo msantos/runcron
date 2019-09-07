@@ -65,7 +65,6 @@ int main(int argc, char *argv[]) {
   const char *errstr = NULL;
   int exit_value = 0;
 
-  int verbose = 0;
   int ch;
 
   rp = calloc(1, sizeof(runcron_t));
@@ -104,13 +103,13 @@ int main(int argc, char *argv[]) {
       break;
 
     case 'T':
-      timeout = strtonum(optarg, 0, UINT32_MAX, &errstr);
+      timeout = strtonum(optarg, -1, UINT32_MAX, &errstr);
       if (errno)
         err(EXIT_FAILURE, "strtonum: %s: %s", optarg, errstr);
       break;
 
     case 'v':
-      verbose++;
+      rp->verbose++;
       break;
 
     case OPT_TIMESTAMP:
@@ -188,7 +187,7 @@ int main(int argc, char *argv[]) {
     (void)fprintf(
         stderr,
         "last exit status was %d, sleep interval is %ds, command timeout "
-        "is %ds\n",
+        "is %us\n",
         status, seconds, timeout);
 
   if (rp->opt & OPT_DRYRUN)
@@ -209,16 +208,16 @@ int main(int argc, char *argv[]) {
     exit(127);
   default:
     if (signal_init() < 0) {
-      (void)kill(pid * -1, default_signal);
+      (void)kill(-pid, default_signal);
     }
     if (rp->verbose >= 1)
-      (void)fprintf(stderr, "running command: timeout is set to %ds\n",
+      (void)fprintf(stderr, "running command: timeout is set to %us\n",
                     timeout);
-    if (timeout > 0) {
+    if (timeout < UINT32_MAX) {
       alarm(timeout);
     }
     if (waitfor(&status) < 0) {
-      (void)kill(pid * -1, default_signal);
+      (void)kill(-pid, default_signal);
       exit(111);
     }
   }
@@ -278,7 +277,7 @@ int waitfor(int *status) {
 
 void signal_handler(int sig) {
   if (pid > 0)
-    (void)kill(pid * -1, sig == SIGALRM ? default_signal : sig);
+    (void)kill(-pid, sig == SIGALRM ? default_signal : sig);
 }
 
 int signal_init() {
