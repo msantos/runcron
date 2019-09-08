@@ -13,6 +13,8 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "waitfor.h"
+
 typedef struct {
   int opt;
   int verbose;

@@ -20,7 +20,6 @@
 #include <sys/file.h>
 #include <sys/param.h>
 #include <sys/stat.h>
-#include <sys/wait.h>
 
 #define RUNCRON_VERSION "0.2.0"
 
@@ -28,7 +27,6 @@ static time_t timestamp(const char *s);
 static int read_exit_status(int fd, int *status);
 static int write_exit_status(int fd, int status);
 void sleepfor(unsigned int seconds);
-int waitfor(int *status);
 int signal_init();
 void signal_handler(int sig);
 static void usage();
@@ -261,18 +259,6 @@ static time_t timestamp(const char *s) {
 void sleepfor(unsigned int seconds) {
   while (seconds > 0)
     seconds = sleep(seconds);
-}
-
-int waitfor(int *status) {
-  for (;;) {
-    errno = 0;
-    if (wait(status) < 0) {
-      if (errno == EINTR)
-        continue;
-      return -1;
-    }
-    return 0;
-  }
 }
 
 void signal_handler(int sig) {

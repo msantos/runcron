@@ -18,7 +18,6 @@
 
 #include <sys/socket.h>
 #include <sys/types.h>
-#include <sys/wait.h>
 
 #include "ccronexpr.h"
 
@@ -88,7 +87,7 @@ static int cronexpr_proc(runcron_t *rp, char *cronentry, unsigned int *sec,
   default:
     (void)close(sv[1]);
 
-    if (wait(&status) < 0)
+    if (waitfor(&status) < 0)
       return -1;
 
     if (WIFEXITED(status))
