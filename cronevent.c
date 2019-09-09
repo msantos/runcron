@@ -49,7 +49,7 @@ static struct runcron_alias {
 
 int cronevent(runcron_t *rp, char *cronentry, unsigned int *seconds,
               time_t now) {
-  return rp->opt & OPT_DISABLE_PROCESS_RESTRICTIONS
+  return (rp->opt & OPT_DISABLE_PROCESS_RESTRICTIONS)
              ? cronexpr(rp, cronentry, seconds, now)
              : cronexpr_proc(rp, cronentry, seconds, now);
 }
