@@ -14,8 +14,10 @@
  */
 #include "runcron.h"
 
+#include "limit_process.h"
 #include "restrict_process.h"
 
+#include <signal.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 
@@ -75,6 +77,8 @@ static int cronexpr_proc(runcron_t *rp, char *cronentry, unsigned int *sec,
 
   case 0:
     (void)close(sv[0]);
+    if (limit_process() < 0)
+      exit(111);
     if (restrict_process() < 0)
       exit(111);
     exit_value = cronexpr(rp, cronentry, &seconds, now);
@@ -95,8 +99,24 @@ static int cronexpr_proc(runcron_t *rp, char *cronentry, unsigned int *sec,
     else if (WIFSIGNALED(status))
       exit_value = 128 + WTERMSIG(status);
 
-    if (exit_value != 0)
+    switch (exit_value) {
+    case 0:
+      break;
+
+    case (128 + SIGXCPU):
+      (void)fprintf(
+          stderr, "error: cron expression parsing exceeded allotted runtime\n");
       return -1;
+
+    case (128 + SIGSEGV):
+      (void)fprintf(
+          stderr,
+          "error: cron expression parsing exceeded allotted memory usage\n");
+      return -1;
+
+    default:
+      return -1;
+    }
 
     if (read(sv[0], &seconds, sizeof(seconds)) != sizeof(seconds))
       return -1;
