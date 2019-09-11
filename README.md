@@ -102,8 +102,11 @@ attempts to run the task depends on the exit status of the previous run:
 
     make
 
+    # selecting method for restricting cron expression parsing
+    RESTRICT_PROCESS=seccomp make
+
     # using musl
-    ./musl-make
+    RESTRICT_PROCESS=rlimit ./musl-make
 
 # ALTERNATIVES
 

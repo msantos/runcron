@@ -1,7 +1,16 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
 
+MACHTYPE="$(uname -m)"
+case "${MACHTYPE}" in
+  armv6l) ;&
+  armv7l) MACHTYPE=arm ;;
+  *) ;;
+esac
+
+export RUNCRON_INCLUDE="${RUNCRON_INCLUDE-/usr/local/lib}"
+export RUNCRON_LDFLAGS="-I$RUNCRON_INCLUDE/kernel-headers/generic/include -I$RUNCRON_INCLUDE/kernel-headers/${MACHTYPE}/include"
 export RUNCRON_CFLAGS="-g -Wall -fwrapv -pedantic -no-pie"
 export CC="musl-gcc -static -Os"
 exec make $@
