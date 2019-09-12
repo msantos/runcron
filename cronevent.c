@@ -63,6 +63,7 @@ static int cronexpr_proc(runcron_t *rp, char *cronentry, unsigned int *sec,
   unsigned int seconds;
   int status;
   int exit_value = 0;
+  int n = -1;
 
   if (socketpair(AF_UNIX, SOCK_STREAM, 0, sv) < 0)
     return -1;
@@ -84,8 +85,14 @@ static int cronexpr_proc(runcron_t *rp, char *cronentry, unsigned int *sec,
     exit_value = cronexpr(rp, cronentry, &seconds, now);
     if (exit_value < 0)
       _exit(1);
-    if (write(sv[1], &seconds, sizeof(seconds)) != sizeof(seconds))
+
+    while ((n = write(sv[1], &seconds, sizeof(seconds))) == -1 &&
+           errno == EINTR)
+      ;
+
+    if (n != sizeof(seconds))
       _exit(111);
+
     _exit(0);
 
   default:
@@ -118,7 +125,10 @@ static int cronexpr_proc(runcron_t *rp, char *cronentry, unsigned int *sec,
       return -1;
     }
 
-    if (read(sv[0], &seconds, sizeof(seconds)) != sizeof(seconds))
+    while ((n = read(sv[0], &seconds, sizeof(seconds))) == -1 && errno == EINTR)
+      ;
+
+    if (n != sizeof(seconds))
       return -1;
 
     *sec = seconds;
