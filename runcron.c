@@ -21,7 +21,7 @@
 #include <sys/param.h>
 #include <sys/stat.h>
 
-#define RUNCRON_VERSION "0.2.0"
+#define RUNCRON_VERSION "0.3.0"
 
 static time_t timestamp(const char *s);
 static int read_exit_status(int fd, int *status);

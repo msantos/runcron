@@ -72,12 +72,15 @@ static int cronexpr_proc(runcron_t *rp, char *cronentry, unsigned int *sec,
 
   switch (pid) {
   case -1:
+    n = errno;
     (void)close(sv[0]);
     (void)close(sv[1]);
+    errno = n;
     return -1;
 
   case 0:
-    (void)close(sv[0]);
+    if (close(sv[0]) < 0)
+      exit(111);
     if (limit_process() < 0)
       exit(111);
     if (restrict_process() < 0)
@@ -96,7 +99,8 @@ static int cronexpr_proc(runcron_t *rp, char *cronentry, unsigned int *sec,
     _exit(0);
 
   default:
-    (void)close(sv[1]);
+    if (close(sv[1]) < 0)
+      return -1;
 
     if (waitfor(&status) < 0)
       return -1;
@@ -133,7 +137,8 @@ static int cronexpr_proc(runcron_t *rp, char *cronentry, unsigned int *sec,
 
     *sec = seconds;
 
-    (void)close(sv[0]);
+    if (close(sv[0]) < 0)
+      return -1;
   }
 
   return 0;
