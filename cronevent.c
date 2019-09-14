@@ -63,7 +63,7 @@ static int cronexpr_proc(runcron_t *rp, char *cronentry, unsigned int *sec,
   unsigned int seconds;
   int status;
   int exit_value = 0;
-  int n = -1;
+  int n;
 
   if (socketpair(AF_UNIX, SOCK_STREAM, 0, sv) < 0)
     return -1;
