@@ -39,6 +39,7 @@ static const struct option long_options[] = {
     {"poll-interval", required_argument, NULL, 'P'},
     {"dryrun", no_argument, NULL, 'n'},
     {"print", no_argument, NULL, 'p'},
+    {"signal", no_argument, NULL, 's'},
     {"timestamp", required_argument, NULL, OPT_TIMESTAMP},
     {"disable-process-restrictions", no_argument, NULL,
      OPT_DISABLE_PROCESS_RESTRICTIONS},
@@ -79,7 +80,7 @@ int main(int argc, char *argv[]) {
 
   (void)localtime(&now);
 
-  while ((ch = getopt_long(argc, argv, "f:hnpP:T:v", long_options, NULL)) !=
+  while ((ch = getopt_long(argc, argv, "f:hnpP:s:T:v", long_options, NULL)) !=
          -1) {
     switch (ch) {
     case 'f':
@@ -96,6 +97,12 @@ int main(int argc, char *argv[]) {
 
     case 'P':
       poll_interval = strtonum(optarg, 0, INT_MAX, &errstr);
+      if (errno)
+        err(EXIT_FAILURE, "strtonum: %s: %s", optarg, errstr);
+      break;
+
+    case 's':
+      default_signal = strtonum(optarg, 0, NSIG, &errstr);
       if (errno)
         err(EXIT_FAILURE, "strtonum: %s: %s", optarg, errstr);
       break;
@@ -325,6 +332,7 @@ static void usage() {
        "3600s)\n"
        "-n, --dryrun           do nothing\n"
        "-p, --print            output seconds to next timespec\n"
+       "-s, --signal           signal sent task on timeout (default: 15)\n"
        "-v, --verbose          verbose mode\n"
        "    --timestamp <YY-MM-DD hh-mm-ss|@epoch>\n"
        "    --disable-process-restrictions\n"
