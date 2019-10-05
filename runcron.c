@@ -23,7 +23,6 @@
 
 #define RUNCRON_VERSION "0.3.0"
 
-static time_t timestamp(const char *s);
 static int read_exit_status(int fd, int *status);
 static int write_exit_status(int fd, int status);
 void sleepfor(unsigned int seconds);
@@ -239,28 +238,6 @@ int main(int argc, char *argv[]) {
     err(111, "write_exit_status: %s", file);
 
   exit(exit_value);
-}
-
-static time_t timestamp(const char *s) {
-  struct tm tm = {0};
-
-  switch (s[0]) {
-  case '@':
-    if (strptime(s + 1, "%s", &tm) == NULL)
-      return -1;
-
-    break;
-
-  default:
-    if (strptime(s, "%Y-%m-%d %T", &tm) == NULL)
-      return -1;
-
-    break;
-  }
-
-  tm.tm_isdst = -1;
-
-  return mktime(&tm);
 }
 
 void sleepfor(unsigned int seconds) {

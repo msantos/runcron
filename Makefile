@@ -5,6 +5,7 @@ SRCS=   runcron.c \
         cronevent.c \
         ccronexpr.c \
         strtonum.c \
+        timestamp.c \
         waitfor.c \
         limit_process.c \
         restrict_process_null.c \

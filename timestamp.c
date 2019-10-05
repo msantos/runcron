@@ -11,38 +11,30 @@
  * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- */
-#include <ctype.h>
-#include <err.h>
-#include <errno.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/time.h>
-#include <sys/types.h>
+ */ 
+#define _XOPEN_SOURCE 700
 #include <time.h>
-#include <unistd.h>
 
-#include "waitfor.h"
 #include "timestamp.h"
 
-typedef struct {
-  int opt;
-  int verbose;
-} runcron_t;
+time_t timestamp(const char *s) {
+  struct tm tm = {0};
 
-enum {
-  OPT_TIMESTAMP = 1,
-  OPT_PRINT = 2,
-  OPT_DRYRUN = 4,
-  OPT_DISABLE_PROCESS_RESTRICTIONS = 8,
-};
+  switch (s[0]) {
+  case '@':
+    if (strptime(s + 1, "%s", &tm) == NULL)
+      return -1;
 
-#ifndef HAVE_STRTONUM
-long long strtonum(const char *numstr, long long minval, long long maxval,
-                   const char **errstrp);
-#endif
+    break;
 
-int cronevent(runcron_t *rp, char *cronentry, unsigned int *seconds,
-              time_t now);
+  default:
+    if (strptime(s, "%Y-%m-%d %T", &tm) == NULL)
+      return -1;
+
+    break;
+  }
+
+  tm.tm_isdst = -1;
+
+  return mktime(&tm);
+}
