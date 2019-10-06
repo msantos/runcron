@@ -12,29 +12,9 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-#define _XOPEN_SOURCE 700
-#include <time.h>
+#include "runcron.h"
+#ifdef RESTRICT_PROCESS_pledge
+#include <unistd.h>
 
-#include "timestamp.h"
-
-time_t timestamp(const char *s) {
-  struct tm tm = {0};
-
-  switch (s[0]) {
-  case '@':
-    if (strptime(s + 1, "%s", &tm) == NULL)
-      return -1;
-
-    break;
-
-  default:
-    if (strptime(s, "%Y-%m-%d %T", &tm) == NULL)
-      return -1;
-
-    break;
-  }
-
-  tm.tm_isdst = -1;
-
-  return mktime(&tm);
-}
+int restrict_process() { return pledge("stdio", NULL); }
+#endif
