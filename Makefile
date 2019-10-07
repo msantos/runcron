@@ -8,6 +8,7 @@ SRCS=   runcron.c \
         timestamp.c \
         waitfor.c \
         limit_process.c \
+        restrict_process_capsicum.c \
         restrict_process_null.c \
         restrict_process_pledge.c \
         restrict_process_rlimit.c \
