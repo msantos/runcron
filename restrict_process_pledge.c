@@ -16,5 +16,5 @@
 #ifdef RESTRICT_PROCESS_pledge
 #include <unistd.h>
 
-int restrict_process() { return pledge("stdio", NULL); }
+int restrict_process(void) { return pledge("stdio", NULL); }
 #endif

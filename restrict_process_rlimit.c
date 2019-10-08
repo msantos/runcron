@@ -17,7 +17,7 @@
 #include <sys/resource.h>
 #include <time.h>
 
-int restrict_process() {
+int restrict_process(void) {
   struct rlimit rl_zero = {0};
 
   if (setrlimit(RLIMIT_NPROC, &rl_zero) < 0)

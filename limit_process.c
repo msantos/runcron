@@ -16,7 +16,7 @@
 #include <sys/resource.h>
 #include <time.h>
 
-int limit_process() {
+int limit_process(void) {
   struct rlimit rl = {0};
 
 #ifdef RLIMIT_CPU

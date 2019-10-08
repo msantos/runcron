@@ -14,5 +14,5 @@
  */
 #include "runcron.h"
 #ifdef RESTRICT_PROCESS_null
-int restrict_process() { return 0; }
+int restrict_process(void) { return 0; }
 #endif

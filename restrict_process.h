@@ -13,4 +13,3 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 int restrict_process(void);
-void sys_exit(int status);

@@ -23,7 +23,7 @@
 
 #include <errno.h>
 
-int restrict_process() {
+int restrict_process(void) {
   struct rlimit rl = {0};
   cap_rights_t policy_read;
   cap_rights_t policy_write;
