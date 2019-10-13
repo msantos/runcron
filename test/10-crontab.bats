@@ -123,3 +123,12 @@ EOF
   [ "$status" -eq 0 ]
   [ "$output" -eq 4294967295 ]
 }
+
+@test "options: arguments allowed in command" {
+  rm -f .runcron.reboot
+  run runcron -f .runcron.reboot -p "@reboot" ls -al
+cat << EOF
+$output
+EOF
+  [ "$status" -eq 0 ]
+}

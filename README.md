@@ -58,7 +58,7 @@ attempts to run the task depends on the exit status of the previous run:
 
         # Attempt to connect to google daily
         # If the connection fails, the task will be retried hourly.
-        runcron -- "43 7 * * *" nc -z google.com 80
+        runcron "43 7 * * *" nc -z google.com 80
 
         # Run at 9:03am on the 20th of each month.
         # After the first run, the job will be terminated before the

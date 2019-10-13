@@ -21,7 +21,7 @@
 #include <sys/param.h>
 #include <sys/stat.h>
 
-#define RUNCRON_VERSION "0.3.0"
+#define RUNCRON_VERSION "0.4.0"
 
 static int read_exit_status(int fd, int *status);
 static int write_exit_status(int fd, int status);
@@ -79,7 +79,7 @@ int main(int argc, char *argv[]) {
 
   (void)localtime(&now);
 
-  while ((ch = getopt_long(argc, argv, "f:hnpP:s:T:v", long_options, NULL)) !=
+  while ((ch = getopt_long(argc, argv, "+f:hnpP:s:T:v", long_options, NULL)) !=
          -1) {
     switch (ch) {
     case 'f':
