@@ -21,7 +21,7 @@
 #include <sys/param.h>
 #include <sys/stat.h>
 
-#define RUNCRON_VERSION "0.4.0"
+#define RUNCRON_VERSION "0.5.0"
 
 static int read_exit_status(int fd, int *status);
 static int write_exit_status(int fd, int status);
@@ -34,6 +34,7 @@ extern char *__progname;
 
 static const struct option long_options[] = {
     {"file", required_argument, NULL, 'f'},
+    {"chdir", required_argument, NULL, 'C'},
     {"timeout", required_argument, NULL, 'T'},
     {"poll-interval", required_argument, NULL, 'P'},
     {"dryrun", no_argument, NULL, 'n'},
@@ -53,6 +54,7 @@ int default_signal = SIGTERM;
 int main(int argc, char *argv[]) {
   runcron_t *rp;
   char *file = ".runcron.lock";
+  char *cwd = NULL;
   char *cronentry;
   int fd;
   int status = 0;
@@ -79,9 +81,13 @@ int main(int argc, char *argv[]) {
 
   (void)localtime(&now);
 
-  while ((ch = getopt_long(argc, argv, "+f:hnpP:s:T:v", long_options, NULL)) !=
-         -1) {
+  while ((ch = getopt_long(argc, argv, "+C:f:hnpP:s:T:v", long_options,
+                           NULL)) != -1) {
     switch (ch) {
+    case 'C':
+      cwd = optarg;
+      break;
+
     case 'f':
       file = optarg;
       break;
@@ -172,6 +178,10 @@ int main(int argc, char *argv[]) {
 
   if (!(rp->opt & OPT_DRYRUN) && (flock(fd, LOCK_EX | LOCK_NB) < 0))
     exit(111);
+
+  if ((cwd != NULL) && (chdir(cwd) < 0)) {
+    err(111, "chdir: %s", cwd);
+  }
 
   if (status != 0) {
     if (seconds > poll_interval) {
@@ -307,6 +317,7 @@ static void usage() {
        "-T, --timeout          specify command timeout (seconds)\n"
        "-P, --poll-interval    interval to retry failed commands (default: "
        "3600s)\n"
+       "-C, --chdir            change working directory\n"
        "-n, --dryrun           do nothing\n"
        "-p, --print            output seconds to next timespec\n"
        "-s, --signal           signal sent task on timeout (default: 15)\n"

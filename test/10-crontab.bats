@@ -132,3 +132,19 @@ $output
 EOF
   [ "$status" -eq 0 ]
 }
+
+@test "options: test changing working directory" {
+  rm -f .runcron.reboot
+  run runcron -C /dev -f .runcron.reboot "@reboot" ls null
+cat << EOF
+$output
+EOF
+  [ "$status" -eq 0 ]
+
+  rm -f .runcron.reboot
+  run runcron -C / -f .runcron.reboot "@reboot" ls null
+cat << EOF
+$output
+EOF
+  [ "$status" -ne 0 ]
+}

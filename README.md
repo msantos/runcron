@@ -77,6 +77,9 @@ attempts to run the task depends on the exit status of the previous run:
 -f, --file
 : lock file path (default: .runcron.lock)
 
+-C, --chdir
+: change working directory before running command
+
 -T, --timeout
 : specify command timeout in seconds (-1 to disable, default: next
   cron interval)
