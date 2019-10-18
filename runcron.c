@@ -21,13 +21,15 @@
 #include <sys/param.h>
 #include <sys/stat.h>
 
-#define RUNCRON_VERSION "0.5.0"
+#define RUNCRON_VERSION "0.6.0"
 
 static int read_exit_status(int fd, int *status);
 static int write_exit_status(int fd, int status);
 void sleepfor(unsigned int seconds);
-int signal_init();
+void wakeup(int sig);
 void signal_handler(int sig);
+int signal_wakeup(void);
+int signal_init(void);
 static void usage();
 
 extern char *__progname;
@@ -50,6 +52,7 @@ static const struct option long_options[] = {
 
 pid_t pid;
 int default_signal = SIGTERM;
+int runnow = 0;
 
 int main(int argc, char *argv[]) {
   runcron_t *rp;
@@ -207,6 +210,9 @@ int main(int argc, char *argv[]) {
   if (rp->opt & OPT_DRYRUN)
     exit(0);
 
+  if (signal_wakeup() < 0)
+    exit(111);
+
   sleepfor(seconds);
 
   pid = fork();
@@ -251,8 +257,18 @@ int main(int argc, char *argv[]) {
 }
 
 void sleepfor(unsigned int seconds) {
-  while (seconds > 0)
+  while (seconds > 0 && !runnow)
     seconds = sleep(seconds);
+}
+
+void wakeup(int sig) {
+  switch (sig) {
+  case SIGUSR1:
+    runnow = 1;
+    break;
+  default:
+    _exit(sig + 128);
+  }
 }
 
 void signal_handler(int sig) {
@@ -260,7 +276,19 @@ void signal_handler(int sig) {
     (void)kill(-pid, sig == SIGALRM ? default_signal : sig);
 }
 
-int signal_init() {
+int signal_wakeup(void) {
+  struct sigaction act = {0};
+
+  act.sa_handler = wakeup;
+  (void)sigfillset(&act.sa_mask);
+
+  if (sigaction(SIGUSR1, &act, NULL) < 0)
+    return -1;
+
+  return 0;
+}
+
+int signal_init(void) {
   struct sigaction act = {0};
   int sig = 0;
 
