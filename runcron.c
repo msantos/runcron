@@ -53,6 +53,7 @@ static const struct option long_options[] = {
 pid_t pid;
 int default_signal = SIGTERM;
 int runnow = 0;
+int remaining = 0;
 
 int main(int argc, char *argv[]) {
   runcron_t *rp;
@@ -257,14 +258,22 @@ int main(int argc, char *argv[]) {
 }
 
 void sleepfor(unsigned int seconds) {
-  while (seconds > 0 && !runnow)
+  while (seconds > 0 && !runnow) {
+    if (remaining) {
+      (void)fprintf(stderr, "%u\n", seconds);
+      remaining = 0;
+    }
     seconds = sleep(seconds);
+  }
 }
 
 void wakeup(int sig) {
   switch (sig) {
   case SIGUSR1:
     runnow = 1;
+    break;
+  case SIGUSR2:
+    remaining = 1;
     break;
   default:
     _exit(sig + 128);
@@ -283,6 +292,9 @@ int signal_wakeup(void) {
   (void)sigfillset(&act.sa_mask);
 
   if (sigaction(SIGUSR1, &act, NULL) < 0)
+    return -1;
+
+  if (sigaction(SIGUSR2, &act, NULL) < 0)
     return -1;
 
   return 0;
