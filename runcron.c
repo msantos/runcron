@@ -21,7 +21,7 @@
 #include <sys/param.h>
 #include <sys/stat.h>
 
-#define RUNCRON_VERSION "0.6.0"
+#define RUNCRON_VERSION "0.7.0"
 
 static int read_exit_status(int fd, int *status);
 static int write_exit_status(int fd, int status);
@@ -42,6 +42,8 @@ static const struct option long_options[] = {
     {"dryrun", no_argument, NULL, 'n'},
     {"print", no_argument, NULL, 'p'},
     {"signal", no_argument, NULL, 's'},
+    {"limit-cpu", required_argument, NULL, OPT_LIMIT_CPU},
+    {"limit-as", required_argument, NULL, OPT_LIMIT_AS},
     {"timestamp", required_argument, NULL, OPT_TIMESTAMP},
     {"disable-process-restrictions", no_argument, NULL,
      OPT_DISABLE_PROCESS_RESTRICTIONS},
@@ -71,13 +73,16 @@ int main(int argc, char *argv[]) {
 
   int ch;
 
+  if (setvbuf(stdout, NULL, _IOLBF, 0) < 0)
+    err(EXIT_FAILURE, "setvbuf");
+
   rp = calloc(1, sizeof(runcron_t));
 
   if (rp == NULL)
     err(EXIT_FAILURE, "calloc");
 
-  if (setvbuf(stdout, NULL, _IOLBF, 0) < 0)
-    err(EXIT_FAILURE, "setvbuf");
+  rp->cpu = 10;
+  rp->as = 1 * 1024 * 1024;
 
   now = time(NULL);
   if (now == -1)
@@ -124,6 +129,18 @@ int main(int argc, char *argv[]) {
 
     case 'v':
       rp->verbose++;
+      break;
+
+    case OPT_LIMIT_CPU:
+      rp->cpu = strtonum(optarg, -1, UINT32_MAX, &errstr);
+      if (errno)
+        err(EXIT_FAILURE, "strtonum: %s: %s", optarg, errstr);
+      break;
+
+    case OPT_LIMIT_AS:
+      rp->as = strtonum(optarg, -1, UINT32_MAX, &errstr);
+      if (errno)
+        err(EXIT_FAILURE, "strtonum: %s: %s", optarg, errstr);
       break;
 
     case OPT_TIMESTAMP:
@@ -362,6 +379,8 @@ static void usage() {
        "-p, --print            output seconds to next timespec\n"
        "-s, --signal           signal sent task on timeout (default: 15)\n"
        "-v, --verbose          verbose mode\n"
+       "    --limit-cpu        restrict cpu usage of cron expression parsing\n"
+       "    --limit-as         restrict memory (address space) of cron expression parsing\n"
        "    --timestamp <YY-MM-DD hh-mm-ss|@epoch>\n"
        "    --disable-process-restrictions\n"
        "                       do not fork cron expression processing\n",

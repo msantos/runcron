@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/resource.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <time.h>
@@ -30,6 +31,8 @@
 typedef struct {
   int opt;
   int verbose;
+  rlim_t cpu;
+  rlim_t as;
 } runcron_t;
 
 enum {
@@ -37,6 +40,8 @@ enum {
   OPT_PRINT = 2,
   OPT_DRYRUN = 4,
   OPT_DISABLE_PROCESS_RESTRICTIONS = 8,
+  OPT_LIMIT_CPU = 16,
+  OPT_LIMIT_AS = 32,
 };
 
 #ifndef HAVE_STRTONUM

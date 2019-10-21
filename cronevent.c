@@ -81,7 +81,7 @@ static int cronexpr_proc(runcron_t *rp, char *cronentry, unsigned int *sec,
   case 0:
     if (close(sv[0]) < 0)
       exit(111);
-    if (limit_process() < 0)
+    if (limit_process(rp) < 0)
       exit(111);
     if (restrict_process() < 0)
       exit(111);
