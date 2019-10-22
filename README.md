@@ -99,6 +99,15 @@ attempts to run the task depends on the exit status of the previous run:
 --timestamp *YY-MM-DD hh-mm-ss|@epoch*
 : provide an initial time
 
+--limit-cpu
+: restrict cpu usage of cron expression parsing (default: 10 seconds)
+
+--limit-as
+: restrict memory (address space) of cron expression parsing (default: 1 Mb)
+
+--disable-process-restrictions
+: do not fork cron expression processing
+
 # BUILDING
 
 ## Quick Install
@@ -108,8 +117,17 @@ attempts to run the task depends on the exit status of the previous run:
     # selecting method for restricting cron expression parsing
     RESTRICT_PROCESS=seccomp make
 
-    # using musl
+    #### using musl
     RESTRICT_PROCESS=rlimit ./musl-make
+
+    ## linux seccomp sandbox: requires kernel headers
+
+    # clone the kernel headers somewhere
+    cd /path/to/dir
+    git clone https://github.com/sabotage-linux/kernel-headers.git
+
+    # then compile
+    RUNCRON_INCLUDE=/path/to/dir ./musl-make clean all
 
 # ALTERNATIVES
 
