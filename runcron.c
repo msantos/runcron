@@ -198,7 +198,7 @@ int main(int argc, char *argv[]) {
   }
 
   if (!(rp->opt & OPT_DRYRUN) && (flock(fd, LOCK_EX | LOCK_NB) < 0))
-    exit(111);
+    err(111, "flock");
 
   if ((cwd != NULL) && (chdir(cwd) < 0)) {
     err(111, "chdir: %s", cwd);
@@ -229,7 +229,7 @@ int main(int argc, char *argv[]) {
     exit(0);
 
   if (signal_wakeup() < 0)
-    exit(111);
+    err(111, "signal_wakeup");
 
   sleepfor(seconds);
 
@@ -237,7 +237,7 @@ int main(int argc, char *argv[]) {
 
   switch (pid) {
   case -1:
-    exit(111);
+    err(111, "fork");
   case 0:
     if (setpgid(0, 0) < 0)
       err(111, "setpgid");
@@ -256,7 +256,7 @@ int main(int argc, char *argv[]) {
     }
     if (waitfor(&status) < 0) {
       (void)kill(-pid, default_signal);
-      exit(111);
+      err(111, "waitfor");
     }
   }
 
