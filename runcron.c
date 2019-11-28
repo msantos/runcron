@@ -32,8 +32,6 @@ int signal_wakeup(void);
 int signal_init(void);
 static void usage();
 
-extern char *__progname;
-
 static const struct option long_options[] = {
     {"file", required_argument, NULL, 'f'},
     {"chdir", required_argument, NULL, 'C'},
