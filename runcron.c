@@ -52,8 +52,8 @@ static const struct option long_options[] = {
 
 pid_t pid;
 int default_signal = SIGTERM;
-int runnow = 0;
-int remaining = 0;
+volatile sig_atomic_t runnow = 0;
+volatile sig_atomic_t remaining = 0;
 
 int main(int argc, char *argv[]) {
   runcron_t *rp;
