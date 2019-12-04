@@ -7,7 +7,10 @@ runcron [*options*] *crontab expression* *command* *arg* *...*
 # DESCRIPTION
 
 `runcron` is a minimal cron running as part of a supervision tree for
-automated environments. `runcron` supervises tasks:
+automated environments. runcron is intended to be simple, safe and
+container-friendly.
+
+`runcron` supervises tasks:
 
 * only allows a single instance of a job to run
 
@@ -107,6 +110,24 @@ attempts to run the task depends on the exit status of the previous run:
 
 --disable-process-restrictions
 : do not fork cron expression processing
+
+# SIGNALS
+
+## Before exec(3)
+
+Before the task is `exec(3)`ed, signals sent to runcron will cause it
+to exit except for:
+
+SIGUSR1
+: Run the job immediately
+
+SIGUSR2
+: Print the remaining number of seconds to stderr
+
+## After exec(3)
+
+Signals (excluding SIGKILL) sent to runcron when the task is running
+are forwarded to the task process group.
 
 # BUILDING
 
