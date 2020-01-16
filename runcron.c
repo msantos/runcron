@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, Michael Santos <michael.santos@gmail.com>
+/* Copyright (c) 2019-2020, Michael Santos <michael.santos@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
   unsigned int seconds;
   unsigned int timeout = 0;
   int32_t poll_interval = 3600; /* 1 hour */
-  const char *errstr = NULL;
+  const char *errstr;
   int exit_value = 0;
 
   int ch;
@@ -317,7 +317,7 @@ int signal_wakeup(void) {
 
 int signal_init(void) {
   struct sigaction act = {0};
-  int sig = 0;
+  int sig;
 
   act.sa_handler = signal_handler;
   (void)sigfillset(&act.sa_mask);
@@ -378,7 +378,8 @@ static void usage() {
        "-s, --signal           signal sent task on timeout (default: 15)\n"
        "-v, --verbose          verbose mode\n"
        "    --limit-cpu        restrict cpu usage of cron expression parsing\n"
-       "    --limit-as         restrict memory (address space) of cron expression parsing\n"
+       "    --limit-as         restrict memory (address space) of cron "
+       "expression parsing\n"
        "    --timestamp <YY-MM-DD hh-mm-ss|@epoch>\n"
        "    --disable-process-restrictions\n"
        "                       do not fork cron expression processing\n",
