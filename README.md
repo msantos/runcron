@@ -6,15 +6,18 @@ runcron [*options*] *crontab expression* *command* *arg* *...*
 
 # DESCRIPTION
 
-`runcron` is a minimal cron running as part of a supervision tree for
-automated environments. runcron is intended to be simple, safe and
-container-friendly.
+`runcron` is a minimal cron running as part of a process supervision
+tree for automated environments. runcron is intended to be simple,
+safe and container-friendly.
 
 `runcron` supervises tasks:
 
+* runs under a supervisor like
+  [daemontools](https://cr.yp.to/daemontools.html)
+
 * only allows a single instance of a job to run
 
-* will terminate the job if the runtime exceeds the next cron interval
+* job runtime is limited to the next cron interval
 
 * periodically retries the job if it exits non-0
 
@@ -53,9 +56,18 @@ crontab(5) aliases also work:
 The `@reboot` alias runs the task immediately. The behaviour of subsequent
 attempts to run the task depends on the exit status of the previous run:
 
-* 0: runcron will not the task and sleep indefinitely
+* 0: runcron will not run the task and sleep indefinitely
 * non-0: runcron will rerun the task after `--poll-interval` seconds
   (default: 3600)
+
+Since the runcron state is written to a file (see `-f` option), the
+state can persist between reboots.
+
+~~~
+umask 077
+mkdir -p /tmp/reboot
+runcron -f /tmp/reboot/runcron.lock ...
+~~~
 
 # EXAMPLES
 
@@ -153,6 +165,8 @@ are forwarded to the task process group.
 # ALTERNATIVES
 
 * [pseudocron](https://github.com/msantos/pseudocron)
+
+* [snooze](https://github.com/leahneukirchen/snooze)
 
 * [runwhen](http://code.dogmap.org/runwhen/)
 
