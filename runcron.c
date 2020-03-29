@@ -21,7 +21,7 @@
 #include <sys/param.h>
 #include <sys/stat.h>
 
-#define RUNCRON_VERSION "0.7.0"
+#define RUNCRON_VERSION "0.8.0"
 
 static int read_exit_status(int fd, int *status);
 static int write_exit_status(int fd, int status);
@@ -39,7 +39,8 @@ static const struct option long_options[] = {
     {"poll-interval", required_argument, NULL, 'P'},
     {"dryrun", no_argument, NULL, 'n'},
     {"print", no_argument, NULL, 'p'},
-    {"signal", no_argument, NULL, 's'},
+    {"signal", required_argument, NULL, 's'},
+    {"disable-signal-on-exit", no_argument, NULL, 'S'},
     {"limit-cpu", required_argument, NULL, OPT_LIMIT_CPU},
     {"limit-as", required_argument, NULL, OPT_LIMIT_AS},
     {"timestamp", required_argument, NULL, OPT_TIMESTAMP},
@@ -68,6 +69,7 @@ int main(int argc, char *argv[]) {
   int32_t poll_interval = 3600; /* 1 hour */
   const char *errstr;
   int exit_value = 0;
+  int signal_on_exit = 1;
 
   int ch;
 
@@ -88,7 +90,7 @@ int main(int argc, char *argv[]) {
 
   (void)localtime(&now);
 
-  while ((ch = getopt_long(argc, argv, "+C:f:hnpP:s:T:v", long_options,
+  while ((ch = getopt_long(argc, argv, "+C:f:hnpP:s:ST:v", long_options,
                            NULL)) != -1) {
     switch (ch) {
     case 'C':
@@ -117,6 +119,10 @@ int main(int argc, char *argv[]) {
       default_signal = strtonum(optarg, 0, NSIG, &errstr);
       if (errno)
         err(EXIT_FAILURE, "strtonum: %s: %s", optarg, errstr);
+      break;
+
+    case 'S':
+      signal_on_exit = 0;
       break;
 
     case 'T':
@@ -269,6 +275,10 @@ int main(int argc, char *argv[]) {
   if (write_exit_status(fd, exit_value) < 0)
     err(111, "write_exit_status: %s", file);
 
+  if (signal_on_exit) {
+    (void)kill(-pid, default_signal);
+  }
+
   exit(exit_value);
 }
 
@@ -376,6 +386,7 @@ static void usage() {
        "-n, --dryrun           do nothing\n"
        "-p, --print            output seconds to next timespec\n"
        "-s, --signal           signal sent task on timeout (default: 15)\n"
+       "-S, --disable-signal-on-exit   disable signal process group on exit\n"
        "-v, --verbose          verbose mode\n"
        "    --limit-cpu        restrict cpu usage of cron expression parsing\n"
        "    --limit-as         restrict memory (address space) of cron "

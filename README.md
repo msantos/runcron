@@ -23,6 +23,8 @@ safe and container-friendly.
 
 * if the tasks succeeds (exits 0), sleeps until the next cron interval
 
+* terminates any background subprocesses when the foreground process exits
+
 cron expressions are parsed using
 [ccronexpr](https://github.com/staticlibs/ccronexpr).
 
@@ -107,6 +109,18 @@ runcron -f /tmp/reboot/runcron.lock ...
 
 -p, --print
 : output seconds to next timespec
+
+-s, --signal
+: signal sent on command timeout
+
+  The signal is also sent on job completion to clean up any background
+  tasks (use -S to disable).
+
+  Default: 15 (SIGTERM)
+
+-S, --disable-signal-on-exit
+: By default, any background subprocesses are terminated when the
+  foreground process is terminated. Use -S to disable this behaviour.
 
 -v, --verbose
 : verbose mode
