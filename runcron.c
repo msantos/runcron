@@ -40,12 +40,12 @@ static const struct option long_options[] = {
     {"dryrun", no_argument, NULL, 'n'},
     {"print", no_argument, NULL, 'p'},
     {"signal", required_argument, NULL, 's'},
-    {"disable-signal-on-exit", no_argument, NULL, 'S'},
     {"limit-cpu", required_argument, NULL, OPT_LIMIT_CPU},
     {"limit-as", required_argument, NULL, OPT_LIMIT_AS},
     {"timestamp", required_argument, NULL, OPT_TIMESTAMP},
     {"disable-process-restrictions", no_argument, NULL,
      OPT_DISABLE_PROCESS_RESTRICTIONS},
+    {"disable-signal-on-exit", no_argument, NULL, OPT_DISABLE_SIGNAL_ON_EXIT},
     {"verbose", no_argument, NULL, 'v'},
     {"help", no_argument, NULL, 'h'},
     {NULL, 0, NULL, 0},
@@ -90,7 +90,7 @@ int main(int argc, char *argv[]) {
 
   (void)localtime(&now);
 
-  while ((ch = getopt_long(argc, argv, "+C:f:hnpP:s:ST:v", long_options,
+  while ((ch = getopt_long(argc, argv, "+C:f:hnpP:s:T:v", long_options,
                            NULL)) != -1) {
     switch (ch) {
     case 'C':
@@ -119,10 +119,6 @@ int main(int argc, char *argv[]) {
       default_signal = strtonum(optarg, 0, NSIG, &errstr);
       if (errno)
         err(EXIT_FAILURE, "strtonum: %s: %s", optarg, errstr);
-      break;
-
-    case 'S':
-      signal_on_exit = 0;
       break;
 
     case 'T':
@@ -155,6 +151,10 @@ int main(int argc, char *argv[]) {
 
     case OPT_DISABLE_PROCESS_RESTRICTIONS:
       rp->opt |= OPT_DISABLE_PROCESS_RESTRICTIONS;
+      break;
+
+    case OPT_DISABLE_SIGNAL_ON_EXIT:
+      signal_on_exit = 0;
       break;
 
     case 'h':
@@ -386,13 +386,14 @@ static void usage() {
        "-n, --dryrun           do nothing\n"
        "-p, --print            output seconds to next timespec\n"
        "-s, --signal           signal sent task on timeout (default: 15)\n"
-       "-S, --disable-signal-on-exit   disable signal process group on exit\n"
        "-v, --verbose          verbose mode\n"
        "    --limit-cpu        restrict cpu usage of cron expression parsing\n"
        "    --limit-as         restrict memory (address space) of cron "
        "expression parsing\n"
        "    --timestamp <YY-MM-DD hh-mm-ss|@epoch>\n"
        "    --disable-process-restrictions\n"
-       "                       do not fork cron expression processing\n",
+       "                       do not fork cron expression processing\n"
+       "    --disable-signal-on-exit\n"
+       "                       disable termination of subprocesses on exit\n",
        RUNCRON_VERSION, RESTRICT_PROCESS);
 }

@@ -114,13 +114,9 @@ runcron -f /tmp/reboot/runcron.lock ...
 : signal sent on command timeout
 
   The signal is also sent on job completion to clean up any background
-  tasks (use -S to disable).
+  tasks (use --disable-signal-on-exit to disable).
 
   Default: 15 (SIGTERM)
-
--S, --disable-signal-on-exit
-: By default, any background subprocesses are terminated when the
-  foreground process is terminated. Use -S to disable this behaviour.
 
 -v, --verbose
 : verbose mode
@@ -136,6 +132,11 @@ runcron -f /tmp/reboot/runcron.lock ...
 
 --disable-process-restrictions
 : do not fork cron expression processing
+
+--disable-signal-on-exit
+: By default, any background subprocesses are terminated when the
+  foreground process is terminated. Use this option to disable signalling
+  background jobs on exit.
 
 # SIGNALS
 
