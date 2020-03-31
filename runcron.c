@@ -30,6 +30,7 @@ void wakeup(int sig);
 void signal_handler(int sig);
 int signal_wakeup(void);
 int signal_init(void);
+static void print_argv(int argc, char *argv[]);
 static void usage();
 
 static const struct option long_options[] = {
@@ -222,12 +223,14 @@ int main(int argc, char *argv[]) {
       exit(1);
   }
 
-  if (rp->verbose >= 1)
+  if (rp->verbose >= 1) {
+    print_argv(argc, argv);
     (void)fprintf(
         stderr,
-        "last exit status was %d, sleep interval is %ds, command timeout "
+        ": last exit status was %d, sleep interval is %ds, command timeout "
         "is %us\n",
         status, seconds, timeout);
+  }
 
   if (rp->opt & OPT_DRYRUN)
     exit(0);
@@ -252,9 +255,11 @@ int main(int argc, char *argv[]) {
     if (signal_init() < 0) {
       (void)kill(-pid, default_signal);
     }
-    if (rp->verbose >= 1)
-      (void)fprintf(stderr, "running command: timeout is set to %us\n",
+    if (rp->verbose >= 1) {
+      print_argv(argc, argv);
+      (void)fprintf(stderr, ": running command: timeout is set to %us\n",
                     timeout);
+    }
     if (timeout < UINT32_MAX) {
       alarm(timeout);
     }
@@ -372,6 +377,15 @@ static int read_exit_status(int fd, int *status) {
 
   *status = buf;
   return 0;
+}
+
+static void print_argv(int argc, char *argv[]) {
+  int i;
+  int space = 0;
+  for (i = 0; i < argc; i++) {
+    (void)fprintf(stderr, "%s%s", (space == 1 ? " " : ""), argv[i]);
+    space = 1;
+  }
 }
 
 static void usage() {
