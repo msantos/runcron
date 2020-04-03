@@ -10,18 +10,32 @@ runcron [*options*] *crontab expression* *command* *arg* *...*
 tree for automated environments. runcron is intended to be simple,
 safe and container-friendly.
 
-`runcron` supervises tasks:
+`runcron` runs under a supervisor like
+[daemontools](https://cr.yp.to/daemontools.html) and exits after task
+completion. The supervisor restarts runcron, taking any action based on
+the task exit status:
 
-* runs under a supervisor like
-  [daemontools](https://cr.yp.to/daemontools.html)
+    svscan,17276,17276 service/
+      |-supervise,17277,17276 date17
+      |   `-runcron,17308,17276 */17 * * * * * sh -c echo 17: $(date)
+      |-supervise,17279,17276 date33
+      |   `-runcron,17303,17276 */33 * * * * * sh -c echo 33: $(date)
+      `-supervise,17280,17276 sleep
+          `-runcron,17282,17276 @reboot sleep inf
+              `-sleep,17288,17288 inf
+
+`runcron` supervises tasks:
 
 * only allows a single instance of a job to run
 
 * job runtime is limited to the next cron interval
 
+* when the task is complete, exits with value set to the task exit status
+
 * periodically retries the job if it exits non-0
 
-* if the tasks succeeds (exits 0), sleeps until the next cron interval
+* if the tasks succeeds (exits 0), when restarted, sleeps until the next
+  cron interval
 
 * terminates any background subprocesses when the foreground process exits
 
