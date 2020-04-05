@@ -14,6 +14,8 @@
  */
 #include "runcron.h"
 
+#include "restrict_process.h"
+
 #include <fcntl.h>
 #include <getopt.h>
 #include <signal.h>
@@ -44,6 +46,7 @@ static const struct option long_options[] = {
     {"limit-cpu", required_argument, NULL, OPT_LIMIT_CPU},
     {"limit-as", required_argument, NULL, OPT_LIMIT_AS},
     {"timestamp", required_argument, NULL, OPT_TIMESTAMP},
+    {"allow-setuid-subprocess", no_argument, NULL, OPT_ALLOW_SETUID_SUBPROCESS},
     {"disable-process-restrictions", no_argument, NULL,
      OPT_DISABLE_PROCESS_RESTRICTIONS},
     {"disable-signal-on-exit", no_argument, NULL, OPT_DISABLE_SIGNAL_ON_EXIT},
@@ -71,6 +74,7 @@ int main(int argc, char *argv[]) {
   const char *errstr;
   int exit_value = 0;
   int signal_on_exit = 1;
+  int allow_setuid_subprocess = 0;
 
   int ch;
 
@@ -132,6 +136,10 @@ int main(int argc, char *argv[]) {
       rp->verbose++;
       break;
 
+    case OPT_ALLOW_SETUID_SUBPROCESS:
+      allow_setuid_subprocess = 1;
+      break;
+
     case OPT_LIMIT_CPU:
       rp->cpu = strtonum(optarg, -1, UINT32_MAX, &errstr);
       if (errno)
@@ -174,6 +182,9 @@ int main(int argc, char *argv[]) {
 
   argc--;
   argv++;
+
+  if (!allow_setuid_subprocess && disable_setuid_subprocess() < 0)
+    err(111, "disable_setuid_subprocess");
 
   if (cronevent(rp, cronentry, &seconds, now) < 0)
     exit(1);
@@ -406,10 +417,13 @@ static void usage() {
        "                                parsing\n"
        "    --limit-as <uint32>       restrict memory (address space) of cron\n"
        "                                expression parsing\n"
+       "    --allow-setuid-subprocess\n"
+       "                              allow running unkillable tasks\n"
        "    --disable-process-restrictions\n"
        "                              do not fork cron expression processing\n"
        "    --disable-signal-on-exit\n"
-       "                              disable termination of subprocesses on exit\n"
+       "                              disable termination of subprocesses on "
+       "exit\n"
        "    --timestamp <YY-MM-DD hh-mm-ss|@epoch>\n"
        "                              set current time\n",
        RUNCRON_VERSION, RESTRICT_PROCESS);

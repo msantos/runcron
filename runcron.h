@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, Michael Santos <michael.santos@gmail.com>
+/* Copyright (c) 2019-2020, Michael Santos <michael.santos@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -43,6 +43,7 @@ enum {
   OPT_LIMIT_CPU = 16,
   OPT_LIMIT_AS = 32,
   OPT_DISABLE_SIGNAL_ON_EXIT = 64,
+  OPT_ALLOW_SETUID_SUBPROCESS = 128,
 };
 
 #ifndef HAVE_STRTONUM

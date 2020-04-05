@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, Michael Santos <michael.santos@gmail.com>
+/* Copyright (c) 2019-2020, Michael Santos <michael.santos@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -72,6 +72,10 @@
 #warning "seccomp: unsupported platform"
 #define SECCOMP_AUDIT_ARCH 0
 #endif
+
+int disable_setuid_subprocess(void) {
+  return prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0);
+}
 
 int restrict_process(void) {
   struct sock_filter filter[] = {

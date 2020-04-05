@@ -159,3 +159,9 @@ $output
 EOF
   [ "$status" -eq 1 ]
 }
+
+@test "prevent unkillable (setuid) subprocesses" {
+  rm -f .runcron.reboot
+  run runcron -f .runcron.reboot -p "@reboot" sudo whoami
+  [ "$status" -eq 1 ]
+}

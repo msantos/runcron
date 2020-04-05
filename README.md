@@ -39,6 +39,8 @@ the task exit status:
 
 * terminates any background subprocesses when the foreground process exits
 
+* attempts to prevent running unkillable (setuid) subprocesses
+
 cron expressions are parsed using
 [ccronexpr](https://github.com/staticlibs/ccronexpr).
 
@@ -143,6 +145,9 @@ runcron -f /tmp/reboot/runcron.lock ...
 
 --limit-as
 : restrict memory (address space) of cron expression parsing (default: 1 Mb)
+
+--allow-setuid-subprocess
+: allow running potentially unkillable subprocesses
 
 --disable-process-restrictions
 : do not fork cron expression processing

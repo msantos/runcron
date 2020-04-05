@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, Michael Santos <michael.santos@gmail.com>
+/* Copyright (c) 2019-2020, Michael Santos <michael.santos@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,6 +16,8 @@
 #ifdef RESTRICT_PROCESS_rlimit
 #include <sys/resource.h>
 #include <time.h>
+
+int disable_setuid_subprocess(void) { return 0; }
 
 int restrict_process(void) {
   struct rlimit rl_zero = {0};
