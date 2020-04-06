@@ -16,6 +16,21 @@
 #ifdef RESTRICT_PROCESS_pledge
 #include <unistd.h>
 
-int disable_setuid_subprocess(void) { return 0; }
+#define PLEDGENAMES
+#include <sys/pledge.h>
+
+int disable_setuid_subprocess(void) {
+  char execpromises[1024] = {0};
+  int i;
+
+  for (i = 0; pledgenames[i].name != NULL; i++) {
+    if ((strlcat(execpromises, pledgenames[i].name, sizeof(execpromises)) >=
+         sizeof(execpromises)) ||
+        (strlcat(execpromises, " ", sizeof(execpromises)) >=
+         sizeof(execpromises)))
+      return -1;
+  }
+  return pledge("stdio exec proc rpath wpath cpath flock", execpromises);
+}
 int restrict_process(void) { return pledge("stdio", NULL); }
 #endif
