@@ -25,6 +25,8 @@
 
 int disable_setuid_subprocess(void) { return 0; }
 
+int restrict_process_init(void) { return 0; }
+
 int restrict_process(void) {
   struct rlimit rl = {0};
   cap_rights_t policy_read;

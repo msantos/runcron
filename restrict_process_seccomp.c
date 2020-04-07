@@ -77,6 +77,8 @@ int disable_setuid_subprocess(void) {
   return prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0);
 }
 
+int restrict_process_init(void) { return 0; }
+
 int restrict_process(void) {
   struct sock_filter filter[] = {
       /* Ensure the syscall arch convention is as expected. */

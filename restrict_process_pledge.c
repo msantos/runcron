@@ -30,7 +30,10 @@ int disable_setuid_subprocess(void) {
          sizeof(execpromises)))
       return -1;
   }
-  return pledge("stdio exec proc rpath wpath cpath flock", execpromises);
+  return pledge(NULL, execpromises);
+}
+int restrict_process_init(void) {
+  return pledge("stdio exec proc rpath wpath cpath flock", NULL);
 }
 int restrict_process(void) { return pledge("stdio", NULL); }
 #endif

@@ -13,4 +13,5 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 int disable_setuid_subprocess(void);
+int restrict_process_init(void);
 int restrict_process(void);

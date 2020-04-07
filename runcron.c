@@ -78,6 +78,9 @@ int main(int argc, char *argv[]) {
 
   int ch;
 
+  if (restrict_process_init() < 0)
+    err(EXIT_FAILURE, "restrict_process_init");
+
   if (setvbuf(stdout, NULL, _IOLBF, 0) < 0)
     err(EXIT_FAILURE, "setvbuf");
 
