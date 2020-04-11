@@ -281,6 +281,7 @@ int main(int argc, char *argv[]) {
       (void)kill(-pid, default_signal);
       err(111, "waitfor");
     }
+    alarm(0);
   }
 
   if (WIFEXITED(status))
