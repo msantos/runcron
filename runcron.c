@@ -254,6 +254,11 @@ int main(int argc, char *argv[]) {
 
   sleepfor(seconds);
 
+  if (status == 0) {
+    if (write_exit_status(fd, 128 + SIGKILL) < 0)
+      err(111, "write_exit_status: %s", file);
+  }
+
   pid = fork();
 
   switch (pid) {
