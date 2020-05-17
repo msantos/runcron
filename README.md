@@ -161,14 +161,17 @@ runcron -f /tmp/reboot/runcron.lock ...
 
 ## Before exec(3)
 
-Before the task is `exec(3)`ed, signals sent to runcron will cause it
-to exit except for:
+Before the task is `exec(3)`ed, signals sent to runcron are ignored
+except for:
 
 SIGUSR1
 : Run the job immediately
 
 SIGUSR2
 : Print the remaining number of seconds to stderr
+
+SIGINT
+: Exit with status 130 (128+SIGINT)
 
 ## After exec(3)
 

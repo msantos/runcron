@@ -28,10 +28,9 @@
 static int read_exit_status(int fd, int *status);
 static int write_exit_status(int fd, int status);
 void sleepfor(unsigned int seconds);
-void wakeup(int sig);
-void signal_handler(int sig);
-int signal_wakeup(void);
-int signal_init(void);
+int signal_init(void (*handler)(int));
+void sa_handler_sleep(int sig);
+void sa_handler_wait(int sig);
 static void print_argv(int argc, char *argv[]);
 static void usage();
 
@@ -249,8 +248,8 @@ int main(int argc, char *argv[]) {
   if (rp->opt & OPT_DRYRUN)
     exit(0);
 
-  if (signal_wakeup() < 0)
-    err(111, "signal_wakeup");
+  if (signal_init(sa_handler_sleep) < 0)
+    err(111, "signal_init");
 
   sleepfor(seconds);
 
@@ -271,7 +270,7 @@ int main(int argc, char *argv[]) {
     (void)execvp(argv[0], argv);
     exit(127);
   default:
-    if (signal_init() < 0) {
+    if (signal_init(sa_handler_wait) < 0) {
       (void)kill(-pid, default_signal);
     }
     if (rp->verbose >= 1) {
@@ -317,7 +316,7 @@ void sleepfor(unsigned int seconds) {
   }
 }
 
-void wakeup(int sig) {
+void sa_handler_sleep(int sig) {
   switch (sig) {
   case SIGUSR1:
     runnow = 1;
@@ -325,36 +324,24 @@ void wakeup(int sig) {
   case SIGUSR2:
     remaining = 1;
     break;
+  case SIGINT:
+    _exit(128 + SIGINT);
+    break;
   default:
-    _exit(sig + 128);
+    break;
   }
 }
 
-void signal_handler(int sig) {
+void sa_handler_wait(int sig) {
   if (pid > 0)
     (void)kill(-pid, sig == SIGALRM ? default_signal : sig);
 }
 
-int signal_wakeup(void) {
-  struct sigaction act = {0};
-
-  act.sa_handler = wakeup;
-  (void)sigfillset(&act.sa_mask);
-
-  if (sigaction(SIGUSR1, &act, NULL) < 0)
-    return -1;
-
-  if (sigaction(SIGUSR2, &act, NULL) < 0)
-    return -1;
-
-  return 0;
-}
-
-int signal_init(void) {
+int signal_init(void (*handler)(int)) {
   struct sigaction act = {0};
   int sig;
 
-  act.sa_handler = signal_handler;
+  act.sa_handler = handler;
   (void)sigfillset(&act.sa_mask);
 
   for (sig = 1; sig < NSIG; sig++) {
