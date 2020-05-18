@@ -267,6 +267,9 @@ int main(int argc, char *argv[]) {
     if (setpgid(0, 0) < 0)
       err(111, "setpgid");
 
+    if (restrict_process_signal_on_supervisor_exit() < 0)
+      err(111, "restrict_process_signal_on_supervisor_exit");
+
     (void)execvp(argv[0], argv);
     exit(127);
   default:

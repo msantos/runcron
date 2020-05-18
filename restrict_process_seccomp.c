@@ -77,6 +77,10 @@ int disable_setuid_subprocess(void) {
   return prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0);
 }
 
+int restrict_process_signal_on_supervisor_exit(void) {
+  return prctl(PR_SET_PDEATHSIG, 9);
+}
+
 int restrict_process_init(void) { return 0; }
 
 int restrict_process(void) {
