@@ -162,10 +162,6 @@ EOF
 
 @test "prevent unkillable (setuid) subprocesses" {
   rm -f .runcron.reboot
-  if [ -e "/usr/bin/doas" ]; then
-    run runcron -f .runcron.reboot -p "@reboot" doas whoami
-  else
-    run runcron -f .runcron.reboot -p "@reboot" sudo whoami
-  fi
+  run runcron -f .runcron.reboot -p "@reboot" ping -c 1 127.0.0.1
   [ "$status" -ne 0 ]
 }
