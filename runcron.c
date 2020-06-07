@@ -23,6 +23,8 @@
 #include <sys/param.h>
 #include <sys/stat.h>
 
+#include "fnv1a.h"
+
 #define RUNCRON_VERSION "0.8.0"
 
 static int read_exit_status(int fd, int *status);
@@ -32,11 +34,13 @@ int signal_init(void (*handler)(int));
 void sa_handler_sleep(int sig);
 void sa_handler_wait(int sig);
 static void print_argv(int argc, char *argv[]);
+static void randinit(char *tag, uint32_t now);
 static void usage();
 
 static const struct option long_options[] = {
     {"file", required_argument, NULL, 'f'},
     {"chdir", required_argument, NULL, 'C'},
+    {"tag", required_argument, NULL, 't'},
     {"timeout", required_argument, NULL, 'T'},
     {"poll-interval", required_argument, NULL, 'P'},
     {"dryrun", no_argument, NULL, 'n'},
@@ -64,6 +68,7 @@ int main(int argc, char *argv[]) {
   char *file = ".runcron.lock";
   char *cwd = NULL;
   char *cronentry;
+  char *tag = NULL;
   int fd;
   int status = 0;
   time_t now;
@@ -97,7 +102,7 @@ int main(int argc, char *argv[]) {
 
   (void)localtime(&now);
 
-  while ((ch = getopt_long(argc, argv, "+C:f:hnpP:s:T:v", long_options,
+  while ((ch = getopt_long(argc, argv, "+C:f:hnpP:s:t:T:v", long_options,
                            NULL)) != -1) {
     switch (ch) {
     case 'C':
@@ -126,6 +131,10 @@ int main(int argc, char *argv[]) {
       default_signal = strtonum(optarg, 0, NSIG, &errstr);
       if (errno)
         err(EXIT_FAILURE, "strtonum: %s: %s", optarg, errstr);
+      break;
+
+    case 't':
+      tag = optarg;
       break;
 
     case 'T':
@@ -184,6 +193,8 @@ int main(int argc, char *argv[]) {
 
   argc--;
   argv++;
+
+  randinit(tag, now);
 
   if (!allow_setuid_subprocess && disable_setuid_subprocess() < 0)
     err(111, "disable_setuid_subprocess");
@@ -398,6 +409,20 @@ static void print_argv(int argc, char *argv[]) {
   }
 }
 
+static void randinit(char *tag, uint32_t now) {
+  uint32_t seed;
+  char name[MAXHOSTNAMELEN] = {0};
+
+  if (tag == NULL) {
+    if (gethostname(name, sizeof(name) - 1) < 0)
+      err(EXIT_FAILURE, "gethostname");
+    tag = name;
+  }
+  seed = strlen(tag) == 0 ? now : fnv1a((uint8_t *)tag, strlen(tag));
+
+  srandom(seed);
+}
+
 static void usage() {
   errx(EXIT_FAILURE,
        "[OPTION] <CRONTAB EXPRESSION> <command> <arg> <...>\n"
@@ -411,6 +436,7 @@ static void usage() {
        "-p, --print                   output seconds to next timespec\n"
        "-s, --signal <signum>         signal sent task on timeout\n"
        "                                (default: 15)\n"
+       "-t, --tag <string>            seed used for random intervals\n"
        "-v, --verbose                 verbose mode\n"
        "    --limit-cpu <uint32>      restrict cpu usage of cron expression\n"
        "                                parsing\n"

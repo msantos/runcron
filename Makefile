@@ -4,6 +4,7 @@ PROG=   runcron
 SRCS=   runcron.c \
         cronevent.c \
         ccronexpr.c \
+        fnv1a.c \
         strtonum.c \
         timestamp.c \
         waitfor.c \

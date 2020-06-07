@@ -44,8 +44,8 @@ the task exit status:
 cron expressions are parsed using
 [ccronexpr](https://github.com/staticlibs/ccronexpr).
 
-The standard crontab(5) expressions are supported. The seconds field
-is optional:
+The standard crontab(5) expressions (and some additional expressions)
+are supported. The seconds field is optional:
 
 				field          allowed values
 				-----          --------------
@@ -68,6 +68,29 @@ crontab(5) aliases also work:
 				@daily         Run once a day, "0 0 * * *".
 				@midnight      (same as @daily)
 				@hourly        Run once an hour, "0 * * * *".
+
+## crontab Expressions
+
+### Randomized Intervals
+
+`runcron` supports random values in intervals inspired by
+[OpenBSD crontab](https://man.openbsd.org/crontab.5).
+
+The `~` character in an interval field will pseudorandomly choose an
+offset:
+
+    # run once, from Monday to Friday, between 12am and 8am
+    0 0~8 * * 1~5
+
+The random offset is predictable, using the system hostname as the seed
+by default. Use the `-t` option to change the seed or set it to an empty
+string ("") to use the current time as the seed.
+
+    # runs: Tuesday at 7am
+    runcron -t "www1.example.com" -vvv -p -n '0 0~8 * * 1~5' echo test
+
+    # runs: Friday at 5am
+    runcron -t "www2.example.com" -vvv -p -n '0 0~8 * * 1~5' echo test
 
 ## @reboot
 
@@ -97,6 +120,19 @@ runcron -f /tmp/reboot/runcron.lock ...
         # After the first run, the job will be terminated before the
         # next scheduled run.
         runcron "3 9 20 * *" sleep inf
+
+        # schedule a task randomly between nodes from Monday-Sunday
+        # each node will choose the same offset based on the hostname
+        runcron "11 * * * 1~7" echo test
+
+        # specify a string to use as a seed
+        runcron -t "foo.example.com" "11 * * * 1~7" echo test
+
+        # or non-deterministically based on the time
+        #
+        # Since the next run interval will be randomly chosen, manually
+        # set a timeout
+        runcron -t "" -T 3600 "11 * * * 1~7" echo test
 
 ## daemontools run script
 
@@ -133,6 +169,17 @@ runcron -f /tmp/reboot/runcron.lock ...
   tasks (use --disable-signal-on-exit to disable).
 
   Default: 15 (SIGTERM)
+
+-t, --tag
+: Seed used for for generating a pseudorandom offset for cron expressions
+  with random intervals. The offset used in a job is constant between
+  runs.
+
+  Setting the tag to an empty string ("") will cause the offset to be
+  pseudorandomly chosen based on the current time. The job timeout will
+  also be random.
+
+  Default: hostname
 
 -v, --verbose
 : verbose mode

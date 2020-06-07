@@ -724,13 +724,14 @@ static unsigned int* get_range(char* field, unsigned int min, unsigned int max, 
     size_t len = 0;
     unsigned int* res = (unsigned int*) cron_malloc(2 * sizeof(unsigned int));
     if (!res) goto return_error;
+    if (!field) goto return_error;
 
     res[0] = 0;
     res[1] = 0;
     if (1 == strlen(field) && '*' == field[0]) {
         res[0] = min;
         res[1] = max - 1;
-    } else if (!has_char(field, '-')) {
+    } else if (!(has_char(field, '-') || has_char(field, '~'))) {
         int err = 0;
         unsigned int val = parse_uint(field, &err);
         if (err) {
@@ -741,7 +742,13 @@ static unsigned int* get_range(char* field, unsigned int min, unsigned int max, 
         res[0] = val;
         res[1] = val;
     } else {
-        parts = split_str(field, '-', &len);
+        if (has_char(field, '-')) {
+          parts = split_str(field, '-', &len);
+        }
+        else if (has_char(field, '~')) {
+          parts = split_str(field, '~', &len);
+        }
+
         if (2 != len) {
             *error = "Specified range requires two fields";
             goto return_error;
@@ -809,9 +816,14 @@ static void set_number_hits(const char* value, uint8_t* target, unsigned int min
 
             }
 
-            for (i1 = range[0]; i1 <= range[1]; i1++) {
+            if (has_char(fields[i], '~')) {
+                i1 = (random() % (range[1] - range[0] + 1)) + range[0];
                 cron_set_bit(target, i1);
-
+            }
+            else {
+                for (i1 = range[0]; i1 <= range[1]; i1++) {
+                  cron_set_bit(target, i1);
+                }
             }
             cron_free(range);
 
@@ -831,7 +843,7 @@ static void set_number_hits(const char* value, uint8_t* target, unsigned int min
                 free_splitted(split, len2);
                 goto return_result;
             }
-            if (!has_char(split[0], '-')) {
+            if (!(has_char(split[0], '-') || has_char(split[0], '~'))) {
                 range[1] = max - 1;
             }
             int err = 0;
@@ -848,8 +860,15 @@ static void set_number_hits(const char* value, uint8_t* target, unsigned int min
                 free_splitted(split, len2);
                 goto return_result;
             }
-            for (i1 = range[0]; i1 <= range[1]; i1 += delta) {
+            if (has_char(fields[i], '~')) {
+                i1 = ((random() % (range[1] - range[0] + 1)) / delta) * delta +
+                  range[0];
                 cron_set_bit(target, i1);
+            }
+            else {
+                for (i1 = range[0]; i1 <= range[1]; i1 += delta) {
+                    cron_set_bit(target, i1);
+                }
             }
             free_splitted(split, len2);
             cron_free(range);
