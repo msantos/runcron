@@ -34,7 +34,7 @@ int signal_init(void (*handler)(int));
 void sa_handler_sleep(int sig);
 void sa_handler_wait(int sig);
 static void print_argv(int argc, char *argv[]);
-static void randinit(char *tag, uint32_t now);
+static void randinit(char *tag);
 static void usage();
 
 static const struct option long_options[] = {
@@ -194,7 +194,7 @@ int main(int argc, char *argv[]) {
   argc--;
   argv++;
 
-  randinit(tag, now);
+  randinit(tag);
 
   if (!allow_setuid_subprocess && disable_setuid_subprocess() < 0)
     err(111, "disable_setuid_subprocess");
@@ -409,16 +409,27 @@ static void print_argv(int argc, char *argv[]) {
   }
 }
 
-static void randinit(char *tag, uint32_t now) {
+static void randinit(char *tag) {
   uint32_t seed;
   char name[MAXHOSTNAMELEN] = {0};
+  size_t len;
 
   if (tag == NULL) {
     if (gethostname(name, sizeof(name) - 1) < 0)
       err(EXIT_FAILURE, "gethostname");
     tag = name;
   }
-  seed = strlen(tag) == 0 ? now : fnv1a((uint8_t *)tag, strlen(tag));
+
+  len = strlen(tag);
+
+  if (len == 0) {
+    struct timeval tv = {0};
+    if (gettimeofday(&tv, NULL) < 0)
+      err(EXIT_FAILURE, "gettimeofday");
+    seed = getpid() ^ tv.tv_sec ^ tv.tv_usec;
+  } else {
+    seed = fnv1a((uint8_t *)tag, len);
+  }
 
   srandom(seed);
 }
