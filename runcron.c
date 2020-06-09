@@ -25,7 +25,7 @@
 
 #include "fnv1a.h"
 
-#define RUNCRON_VERSION "0.8.0"
+#define RUNCRON_VERSION "0.9.0"
 
 static int read_exit_status(int fd, int *status);
 static int write_exit_status(int fd, int status);

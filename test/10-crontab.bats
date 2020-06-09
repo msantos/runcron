@@ -19,6 +19,24 @@ EOF
   [ "$output" -eq 106902 ]
 }
 
+@test "crontab format: random intervals" {
+  run runcron -np -t "www1.example.com" \
+        --timestamp="2018-01-24 18:18:18" "0 0~8/2 * * 1~5" true
+cat << EOF
+$output
+EOF
+  [ "$status" -eq 0 ]
+  [ "$output" -eq 474102 ]
+
+  run runcron -np -t "www2.example.com" \
+        --timestamp="2018-01-24 18:18:18" "0 0~8/2 * * 1~5" true
+cat << EOF
+$output
+EOF
+  [ "$status" -eq 0 ]
+  [ "$output" -eq 121302 ]
+}
+
 @test "crontab format: space delimited fields" {
   run runcron -n "  *    *  * *     *" true
 cat << EOF
