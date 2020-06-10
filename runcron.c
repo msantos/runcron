@@ -431,7 +431,11 @@ static void randinit(char *tag) {
     seed = fnv1a((uint8_t *)tag, len);
   }
 
+#if defined(__OpenBSD__)
+  srandom_deterministic(seed);
+#else
   srandom(seed);
+#endif
 }
 
 static void usage() {
