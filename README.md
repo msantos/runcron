@@ -220,6 +220,9 @@ SIGUSR2
 SIGINT
 : Exit with status 130 (128+SIGINT)
 
+SIGTERM
+: Exit with status 143 (128+SIGTERM)
+
 ## After exec(3)
 
 Signals (excluding SIGKILL) sent to runcron when the task is running

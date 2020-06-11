@@ -341,6 +341,9 @@ void sa_handler_sleep(int sig) {
   case SIGINT:
     _exit(128 + SIGINT);
     break;
+  case SIGTERM:
+    _exit(128 + SIGTERM);
+    break;
   default:
     break;
   }
