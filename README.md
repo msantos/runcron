@@ -218,10 +218,10 @@ SIGUSR2
 : Print the remaining number of seconds to stderr
 
 SIGINT
-: Exit with status 130 (128+SIGINT)
+: Exit with status 111
 
 SIGTERM
-: Exit with status 143 (128+SIGTERM)
+: Exit with status 111
 
 ## After exec(3)
 
