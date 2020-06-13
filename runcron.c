@@ -24,6 +24,17 @@
 #include <sys/stat.h>
 
 #include "fnv1a.h"
+#ifndef HAVE_SETPROCTITLE
+#include "setproctitle.h"
+#endif
+
+#ifdef HAVE_SETPROCTITLE
+#define RUNCRON_TITLE_SLEEP "(%s %ds) %s"
+#define RUNCRON_TITLE_RUN "(running) %s"
+#else
+#define RUNCRON_TITLE_SLEEP "runcron: (%s %ds) %s"
+#define RUNCRON_TITLE_RUN "runcron: (running) %s"
+#endif
 
 #define RUNCRON_VERSION "0.9.0"
 
@@ -35,6 +46,7 @@ void sa_handler_sleep(int sig);
 void sa_handler_wait(int sig);
 static void print_argv(int argc, char *argv[]);
 static void randinit(char *tag);
+static char *join(char **arg, size_t n);
 static void usage();
 
 static const struct option long_options[] = {
@@ -80,7 +92,15 @@ int main(int argc, char *argv[]) {
   int signal_on_exit = 1;
   int allow_setuid_subprocess = 0;
 
+  char **oargv = argv + 1;
+  int oargc = argc - 1;
+  char *procname;
+
   int ch;
+
+#ifndef HAVE_SETPROCTITLE
+  spt_init(argc, argv);
+#endif
 
   if (restrict_process_init() < 0)
     err(EXIT_FAILURE, "restrict_process_init");
@@ -194,6 +214,10 @@ int main(int argc, char *argv[]) {
   argc--;
   argv++;
 
+  procname = join(oargv, oargc);
+  if (procname == NULL)
+    err(111, "out of memory");
+
   randinit(tag);
 
   if (!allow_setuid_subprocess && disable_setuid_subprocess() < 0)
@@ -262,6 +286,9 @@ int main(int argc, char *argv[]) {
   if (signal_init(sa_handler_sleep) < 0)
     err(111, "signal_init");
 
+  setproctitle(RUNCRON_TITLE_SLEEP, status == 0 ? "sleep" : "retry", seconds,
+               procname);
+
   sleepfor(seconds);
 
   if (status == 0) {
@@ -295,6 +322,7 @@ int main(int argc, char *argv[]) {
     if (timeout < UINT32_MAX) {
       alarm(timeout);
     }
+    setproctitle(RUNCRON_TITLE_RUN, procname);
     if (waitfor(&status) < 0) {
       (void)kill(-pid, default_signal);
       err(111, "waitfor");
@@ -439,6 +467,45 @@ static void randinit(char *tag) {
 #else
   srandom(seed);
 #endif
+}
+
+static char *join(char **arg, size_t n) {
+  size_t len = 0;
+  size_t alen = 0;
+  char *buf;
+  int i;
+  int append = 0;
+
+  for (i = 0; i < n; i++) {
+    len += strlen(arg[i]);
+  }
+
+  len += n; /* spaces */
+  buf = malloc(len + 1);
+  if (buf == NULL)
+    return NULL;
+
+  for (i = 0; i < n; i++) {
+    int rv;
+
+    if (append) {
+      rv = snprintf(buf + alen, len - alen, " ");
+      if (rv < 0 || rv >= len - alen)
+        goto ERR;
+      alen += rv;
+    }
+    rv = snprintf(buf + alen, len - alen, "%s", arg[i]);
+    if (rv < 0 || rv >= len - alen)
+      goto ERR;
+    alen += rv;
+    append = 1;
+  }
+
+  return buf;
+
+ERR:
+  free(buf);
+  return NULL;
 }
 
 static void usage() {

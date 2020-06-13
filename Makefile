@@ -7,6 +7,7 @@ SRCS=   runcron.c \
         fnv1a.c \
         strtonum.c \
         timestamp.c \
+        setproctitle.c \
         waitfor.c \
         limit_process.c \
         restrict_process_capsicum.c \
