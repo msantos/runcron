@@ -29,14 +29,12 @@
 #endif
 
 #ifdef HAVE_SETPROCTITLE
-#define RUNCRON_TITLE_SLEEP "(%s %ds) %s"
-#define RUNCRON_TITLE_RUN "(running) %s"
+#define RUNCRON_TITLE "(%s %ds) %s"
 #else
-#define RUNCRON_TITLE_SLEEP "runcron: (%s %ds) %s"
-#define RUNCRON_TITLE_RUN "runcron: (running) %s"
+#define RUNCRON_TITLE "runcron: (%s %ds) %s"
 #endif
 
-#define RUNCRON_VERSION "0.9.0"
+#define RUNCRON_VERSION "0.10.0"
 
 static int read_exit_status(int fd, int *status);
 static int write_exit_status(int fd, int status);
@@ -286,7 +284,7 @@ int main(int argc, char *argv[]) {
   if (signal_init(sa_handler_sleep) < 0)
     err(111, "signal_init");
 
-  setproctitle(RUNCRON_TITLE_SLEEP, status == 0 ? "sleep" : "retry", seconds,
+  setproctitle(RUNCRON_TITLE, status == 0 ? "sleep" : "retry", seconds,
                procname);
 
   sleepfor(seconds);
@@ -322,7 +320,7 @@ int main(int argc, char *argv[]) {
     if (timeout < UINT32_MAX) {
       alarm(timeout);
     }
-    setproctitle(RUNCRON_TITLE_RUN, procname);
+    setproctitle(RUNCRON_TITLE, "running", timeout, procname);
     if (waitfor(&status) < 0) {
       (void)kill(-pid, default_signal);
       err(111, "waitfor");
