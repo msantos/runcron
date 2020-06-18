@@ -25,14 +25,16 @@ ifeq ($(UNAME_SYS), Linux)
     LDFLAGS += -Wl,-z,relro,-z,now -Wl,-z,noexecstack
 	  RESTRICT_PROCESS ?= seccomp
 else ifeq ($(UNAME_SYS), OpenBSD)
-    CFLAGS ?= -D_FORTIFY_SOURCE=2 -O2 -fstack-protector-strong \
+    CFLAGS ?= -DHAVE_SETPROCTITLE \
+              -D_FORTIFY_SOURCE=2 -O2 -fstack-protector-strong \
               -Wformat -Werror=format-security \
               -pie -fPIE \
               -fno-strict-aliasing
     LDFLAGS += -Wno-missing-braces -Wl,-z,relro,-z,now -Wl,-z,noexecstack
     RESTRICT_PROCESS ?= pledge
 else ifeq ($(UNAME_SYS), FreeBSD)
-    CFLAGS ?= -D_FORTIFY_SOURCE=2 -O2 -fstack-protector-strong \
+    CFLAGS ?= -DHAVE_SETPROCTITLE \
+              -D_FORTIFY_SOURCE=2 -O2 -fstack-protector-strong \
               -Wformat -Werror=format-security \
               -pie -fPIE \
               -fno-strict-aliasing
