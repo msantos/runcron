@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, Michael Santos <michael.santos@gmail.com>
+/* Copyright (c) 2019-2020, Michael Santos <michael.santos@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -17,7 +17,7 @@
 
 #include "timestamp.h"
 
-time_t timestamp(const char *s) {
+time_t timestamp(const char *s, struct tm *tm0) {
   struct tm tm = {0};
 
   switch (s[0]) {
@@ -25,6 +25,10 @@ time_t timestamp(const char *s) {
     if (strptime(s + 1, "%s", &tm) == NULL)
       return -1;
 
+#if defined(__OpenBSD__)
+    tm.tm_isdst = -1;
+    return mktime(&tm) + tm0->tm_gmtoff;
+#endif
     break;
 
   default:

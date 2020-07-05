@@ -82,6 +82,7 @@ int main(int argc, char *argv[]) {
   int fd;
   int status = 0;
   time_t now;
+  struct tm *tm;
   unsigned int seconds;
   unsigned int timeout = 0;
   int32_t poll_interval = 3600; /* 1 hour */
@@ -118,7 +119,7 @@ int main(int argc, char *argv[]) {
   if (now == -1)
     err(EXIT_FAILURE, "time");
 
-  (void)localtime(&now);
+  tm = localtime(&now);
 
   while ((ch = getopt_long(argc, argv, "+C:f:hnpP:s:t:T:v", long_options,
                            NULL)) != -1) {
@@ -182,7 +183,7 @@ int main(int argc, char *argv[]) {
       break;
 
     case OPT_TIMESTAMP:
-      now = timestamp(optarg);
+      now = timestamp(optarg, tm);
       if (now == -1)
         errx(EXIT_FAILURE, "error: invalid timestamp: %s", optarg);
       break;
