@@ -12,4 +12,4 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-time_t timestamp(const char *s, struct tm *tm0);
+time_t timestamp(const char *s);

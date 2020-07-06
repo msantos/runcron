@@ -17,7 +17,7 @@
 
 #include "timestamp.h"
 
-time_t timestamp(const char *s, struct tm *tm0) {
+time_t timestamp(const char *s) {
   struct tm tm = {0};
 
   switch (s[0]) {
@@ -27,7 +27,7 @@ time_t timestamp(const char *s, struct tm *tm0) {
 
 #if defined(__OpenBSD__)
     tm.tm_isdst = -1;
-    return mktime(&tm) + tm0->tm_gmtoff;
+    return mktime(&tm) + tm.tm_gmtoff;
 #endif
     break;
 
