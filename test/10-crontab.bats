@@ -100,6 +100,9 @@ EOF
 
 @test "timestamp: accept epoch seconds" {
   run runcron -np --timestamp "@1520834100" "15 2 * * *" true
+  if [[ $output =~ runcron:\ error:\ invalid\ timestamp:\ @1520834100 ]]; then
+      skip 'strptime does not support "%s"'
+  fi
 cat << EOF
 $output
 EOF
