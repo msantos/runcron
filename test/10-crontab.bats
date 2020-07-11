@@ -26,7 +26,16 @@ cat << EOF
 $output
 EOF
   [ "$status" -eq 0 ]
-  [ "$output" -eq 474102 ]
+
+  # The interval depends on the random(3) implementation but is constant.
+  case `uname -s` in
+    FreeBSD) [ "$output" -eq 380502 ]  ;;
+    OpenBSD) [ "$output" -eq 474102 ]  ;;
+    Linux)
+      # glbc || musl
+      [ "$output" -eq 474102 ] || [ "$output" -eq 34902 ] ;;
+    *) skip ;;
+  esac
 
   run runcron -np -t "www2.example.com" \
         --timestamp="2018-01-24 18:18:18" "0 0~8/2 * * 1~5" true
@@ -34,7 +43,15 @@ cat << EOF
 $output
 EOF
   [ "$status" -eq 0 ]
-  [ "$output" -eq 121302 ]
+
+  case `uname -s` in
+    FreeBSD) [ "$output" -eq 553302 ] ;;
+    OpenBSD) [ "$output" -eq 121302 ] ;;
+    Linux)
+      # glbc || musl
+      [ "$output" -eq 121302 ] || [ "$output" -eq 452502 ] ;;
+    *) skip ;;
+  esac
 }
 
 @test "crontab format: space delimited fields" {
