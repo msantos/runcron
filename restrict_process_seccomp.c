@@ -115,6 +115,9 @@ int restrict_process(void) {
 #ifdef __NR_stat64
       SC_ALLOW(stat64),
 #endif
+#ifdef __NR_newfstatat
+      SC_ALLOW(newfstatat),
+#endif
 
   /* stdio */
 #ifdef __NR_write
