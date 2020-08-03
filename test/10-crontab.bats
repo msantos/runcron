@@ -200,6 +200,12 @@ EOF
 
 @test "prevent unkillable (setuid) subprocesses" {
   rm -f .runcron.reboot
-  run runcron -f .runcron.reboot -p "@reboot" ping -c 1 127.0.0.1
-  [ "$status" -ne 0 ]
+  case `uname -s` in
+    OpenBSD) ;&
+    Linux)
+      run runcron -f .runcron.reboot -p "@reboot" ping -c 1 127.0.0.1
+      [ "$status" -ne 0 ]
+      ;;
+    *) skip ;;
+  esac
 }
