@@ -222,7 +222,7 @@ int main(int argc, char *argv[]) {
     err(111, "disable_setuid_subprocess");
 
   if (cronevent(rp, cronentry, &seconds, now) < 0)
-    exit(1);
+    exit(111);
 
   fd = open(file, O_RDWR | O_CREAT | O_EXCL | O_CLOEXEC, 0600);
 
