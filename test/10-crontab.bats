@@ -75,7 +75,7 @@ EOF
 cat << EOF
 $output
 EOF
-  [ "$status" -eq 1 ]
+  [ "$status" -eq 111 ]
   [ "$output" = "runcron: error: invalid crontab timespec: Invalid number of fields, expression must consist of 6 fields" ]
 }
 
@@ -93,7 +93,7 @@ EOF
 cat << EOF
 $output
 EOF
-  [ "$status" -eq 1 ]
+  [ "$status" -eq 111 ]
   [ "$output" = "runcron: error: invalid crontab timespec" ]
 }
 
@@ -102,7 +102,7 @@ EOF
 cat << EOF
 $output
 EOF
-  [ "$status" -eq 1 ]
+  [ "$status" -eq 111 ]
   [ "$output" = "runcron: error: timespec exceeds maximum length: 252" ]
 }
 
@@ -140,7 +140,7 @@ EOF
 cat << EOF
 $output
 EOF
-  [ "$status" -eq 1 ]
+  [ "$status" -eq 111 ]
 }
 
 @test "crontab format: @reboot: first run" {
