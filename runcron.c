@@ -43,7 +43,7 @@ int signal_init(void (*handler)(int));
 void sa_handler_sleep(int sig);
 void sa_handler_wait(int sig);
 static void print_argv(int argc, char *argv[]);
-static void randinit(char *tag);
+static int randinit(char *tag);
 static char *join(char **arg, size_t n);
 static void usage();
 
@@ -216,7 +216,8 @@ int main(int argc, char *argv[]) {
   if (procname == NULL)
     err(111, "out of memory");
 
-  randinit(tag);
+  if (randinit(tag) < 0)
+    err(111, "randinit");
 
   if (!allow_setuid_subprocess && disable_setuid_subprocess() < 0)
     err(111, "disable_setuid_subprocess");
@@ -438,14 +439,14 @@ static void print_argv(int argc, char *argv[]) {
   }
 }
 
-static void randinit(char *tag) {
+static int randinit(char *tag) {
   uint32_t seed;
   char name[MAXHOSTNAMELEN] = {0};
   size_t len;
 
   if (tag == NULL) {
     if (gethostname(name, sizeof(name) - 1) < 0)
-      err(EXIT_FAILURE, "gethostname");
+      return -1;
     tag = name;
   }
 
@@ -454,7 +455,7 @@ static void randinit(char *tag) {
   if (len == 0) {
     struct timeval tv = {0};
     if (gettimeofday(&tv, NULL) < 0)
-      err(EXIT_FAILURE, "gettimeofday");
+      return -1;
     seed = getpid() ^ tv.tv_sec ^ tv.tv_usec;
   } else {
     seed = fnv1a((uint8_t *)tag, len);
@@ -465,6 +466,7 @@ static void randinit(char *tag) {
 #else
   srandom(seed);
 #endif
+  return 0;
 }
 
 static char *join(char **arg, size_t n) {
