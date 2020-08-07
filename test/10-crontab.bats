@@ -189,7 +189,7 @@ EOF
 
 @test "exit: terminate background subprocesses" {
   rm -f .runcron.reboot
-  run runcron -f .runcron.reboot -p "@reboot" bash -c "exec -a RUNCRON_TEST_SLEEP sleep inf &"
+  run runcron -f .runcron.reboot -p "@reboot" bash -c "exec -a RUNCRON_TEST_SLEEP sleep 60 &"
   [ "$status" -eq 0 ]
   run pgrep -f RUNCRON_TEST_SLEEP
 cat << EOF
