@@ -36,6 +36,7 @@
 
 #define RUNCRON_VERSION "0.10.0"
 
+static int open_exit_status(char *file, int *status, unsigned int *seconds);
 static int read_exit_status(int fd, int *status);
 static int write_exit_status(int fd, int status);
 void sleepfor(unsigned int seconds);
@@ -225,29 +226,9 @@ int main(int argc, char *argv[]) {
   if (cronevent(rp, cronentry, &seconds, now) < 0)
     exit(111);
 
-  fd = open(file, O_RDWR | O_CREAT | O_EXCL | O_CLOEXEC, 0600);
-
-  if (fd < 0) {
-    switch (errno) {
-    case EEXIST:
-      fd = open(file, O_RDWR | O_CLOEXEC, 0);
-      if (fd < 0)
-        err(111, "open: %s", file);
-      if (read_exit_status(fd, &status) < 0)
-        err(111, "read_exit_status: %s", file);
-      break;
-    default:
-      err(111, "open: %s", file);
-    }
-  } else {
-    /* @reboot */
-    if (seconds == UINT32_MAX) {
-      status = 255;
-      seconds = 0;
-    }
-    if (write_exit_status(fd, status) < 0)
-      err(111, "write_exit_status: %s", file);
-  }
+  fd = open_exit_status(file, &status, &seconds);
+  if (fd <0)
+    err(111, "open_exit_status: %s", file);
 
   if (!(rp->opt & OPT_DRYRUN) && (flock(fd, LOCK_EX | LOCK_NB) < 0))
     err(111, "flock");
@@ -401,6 +382,41 @@ int signal_init(void (*handler)(int)) {
   }
 
   return 0;
+}
+
+static int open_exit_status(char *file, int *status, unsigned int *seconds) {
+  int fd;
+
+  fd = open(file, O_RDWR | O_CREAT | O_EXCL | O_CLOEXEC, 0600);
+
+  if (fd < 0) {
+    switch (errno) {
+    case EEXIST:
+      fd = open(file, O_RDWR | O_CLOEXEC, 0);
+      if (fd < 0)
+        return -1;
+      if (read_exit_status(fd, status) < 0) {
+        (void)close(fd);
+        return -1;
+      }
+      return fd;
+    default:
+      return -1;
+    }
+  }
+
+  if (*seconds == UINT32_MAX) {
+    /* @reboot */
+    *status = 255;
+    *seconds = 0;
+  }
+
+  if (write_exit_status(fd, *status) < 0) {
+    (void)close(fd);
+    return -1;
+  }
+
+  return fd;
 }
 
 static int write_exit_status(int fd, int status) {
