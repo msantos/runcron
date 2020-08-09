@@ -36,7 +36,7 @@
 
 #define RUNCRON_VERSION "0.10.0"
 
-static int open_exit_status(char *file, int *status, unsigned int *seconds);
+static int open_exit_status(char *file, int *status);
 static int read_exit_status(int fd, int *status);
 static int write_exit_status(int fd, int status);
 void sleepfor(unsigned int seconds);
@@ -226,9 +226,18 @@ int main(int argc, char *argv[]) {
   if (cronevent(rp, cronentry, &seconds, now) < 0)
     exit(111);
 
-  fd = open_exit_status(file, &status, &seconds);
-  if (fd <0)
+  /* @reboot:if the runcron state file doesn't exit, set the exit status
+   * to 255. */
+  if (seconds == UINT32_MAX)
+    status = 255;
+
+  fd = open_exit_status(file, &status);
+  if (fd < 0)
     err(111, "open_exit_status: %s", file);
+
+  /* @reboot: run immediately */
+  if (seconds == UINT32_MAX && status == 255)
+    seconds = 0;
 
   if (!(rp->opt & OPT_DRYRUN) && (flock(fd, LOCK_EX | LOCK_NB) < 0))
     err(111, "flock");
@@ -384,7 +393,7 @@ int signal_init(void (*handler)(int)) {
   return 0;
 }
 
-static int open_exit_status(char *file, int *status, unsigned int *seconds) {
+static int open_exit_status(char *file, int *status) {
   int fd;
 
   fd = open(file, O_RDWR | O_CREAT | O_EXCL | O_CLOEXEC, 0600);
@@ -403,12 +412,6 @@ static int open_exit_status(char *file, int *status, unsigned int *seconds) {
     default:
       return -1;
     }
-  }
-
-  if (*seconds == UINT32_MAX) {
-    /* @reboot */
-    *status = 255;
-    *seconds = 0;
   }
 
   if (write_exit_status(fd, *status) < 0) {
