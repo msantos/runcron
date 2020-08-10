@@ -215,7 +215,7 @@ int main(int argc, char *argv[]) {
 
   procname = join(oargv, oargc);
   if (procname == NULL)
-    err(111, "out of memory");
+    err(111, "join");
 
   if (randinit(tag) < 0)
     err(111, "randinit");
@@ -494,29 +494,31 @@ static char *join(char **arg, size_t n) {
   char *buf;
   int i;
   int append = 0;
+  char *space = " ";
 
   for (i = 0; i < n; i++) {
     len += strlen(arg[i]);
   }
 
   len += n; /* spaces */
-  buf = malloc(len + 1);
+  buf = calloc(len + 1, 1);
   if (buf == NULL)
     return NULL;
 
   for (i = 0; i < n; i++) {
-    int rv;
+    size_t argsz;
 
     if (append) {
-      rv = snprintf(buf + alen, len - alen, " ");
-      if (rv < 0 || rv >= len - alen)
+      if (alen + 1 >= len)
         goto ERR;
-      alen += rv;
+      (void)memcpy(buf + alen, space, 1);
+      alen += 1;
     }
-    rv = snprintf(buf + alen, len - alen, "%s", arg[i]);
-    if (rv < 0 || rv >= len - alen)
+    argsz = strlen(arg[i]);
+    if (alen + argsz >= len)
       goto ERR;
-    alen += rv;
+    (void)memcpy(buf + alen, arg[i], argsz);
+    alen += argsz;
     append = 1;
   }
 
@@ -524,6 +526,7 @@ static char *join(char **arg, size_t n) {
 
 ERR:
   free(buf);
+  errno = EINVAL;
   return NULL;
 }
 
