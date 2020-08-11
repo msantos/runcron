@@ -496,11 +496,16 @@ static char *join(char **arg, size_t n) {
   int append = 0;
   char *space = " ";
 
+  if (n == 0) {
+    errno = EINVAL;
+    return NULL;
+  }
+
   for (i = 0; i < n; i++) {
     len += strlen(arg[i]);
   }
 
-  len += n; /* spaces */
+  len += n - 1; /* spaces */
   buf = calloc(len + 1, 1);
   if (buf == NULL)
     return NULL;
@@ -509,13 +514,13 @@ static char *join(char **arg, size_t n) {
     size_t argsz;
 
     if (append) {
-      if (alen + 1 >= len)
+      if (alen + 1 > len)
         goto ERR;
       (void)memcpy(buf + alen, space, 1);
       alen += 1;
     }
     argsz = strlen(arg[i]);
-    if (alen + argsz >= len)
+    if (alen + argsz > len)
       goto ERR;
     (void)memcpy(buf + alen, arg[i], argsz);
     alen += argsz;
