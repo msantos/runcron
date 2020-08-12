@@ -257,7 +257,7 @@ int main(int argc, char *argv[]) {
 
   if (timeout == 0) {
     if (cronevent(rp, cronentry, &timeout, now + seconds) < 0)
-      exit(1);
+      exit(111);
   }
 
   if (rp->verbose >= 1) {
