@@ -12,7 +12,7 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-#include "runcron.h"
+#include "restrict_process.h"
 #ifdef RESTRICT_PROCESS_null
 int disable_setuid_subprocess(void) { return 0; }
 int restrict_process_signal_on_supervisor_exit(void) { return 0; }

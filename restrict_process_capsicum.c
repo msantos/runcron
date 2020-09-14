@@ -12,7 +12,7 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-#include "runcron.h"
+#include "restrict_process.h"
 #ifdef RESTRICT_PROCESS_capsicum
 #include <sys/capsicum.h>
 #include <sys/param.h>
