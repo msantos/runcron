@@ -9,8 +9,8 @@ case "${MACHTYPE}" in
   *) ;;
 esac
 
-export RUNCRON_INCLUDE="${RUNCRON_INCLUDE-/usr/local/lib}"
-export RUNCRON_LDFLAGS="-I$RUNCRON_INCLUDE/kernel-headers/generic/include -I$RUNCRON_INCLUDE/kernel-headers/${MACHTYPE}/include"
+export MUSL_INCLUDE="${MUSL_INCLUDE-/usr/local/lib}"
+export RUNCRON_LDFLAGS="-I$MUSL_INCLUDE/kernel-headers/generic/include -I$MUSL_INCLUDE/kernel-headers/${MACHTYPE}/include"
 export RUNCRON_CFLAGS="-g -Wall -fwrapv -pedantic -no-pie"
 export CC="musl-gcc -static -Os"
 exec make $@

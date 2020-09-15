@@ -247,7 +247,7 @@ are forwarded to the task process group.
     git clone https://github.com/sabotage-linux/kernel-headers.git
 
     # then compile
-    RUNCRON_INCLUDE=/path/to/dir ./musl-make clean all
+    MUSL_INCLUDE=/path/to/dir ./musl-make clean all
 
 # ALTERNATIVES
 
