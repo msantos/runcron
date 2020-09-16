@@ -14,16 +14,30 @@
  */
 #include "runcron.h"
 
-#include "restrict_process.h"
-
+#include <err.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <getopt.h>
 #include <signal.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/file.h>
 #include <sys/param.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <time.h>
+#include <unistd.h>
 
+#include "cronevent.h"
 #include "fnv1a.h"
+#include "restrict_process.h"
+#include "timestamp.h"
+#include "waitfor.h"
+#ifndef HAVE_STRTONUM
+#include "strtonum.h"
+#endif
 #ifndef HAVE_SETPROCTITLE
 #include "setproctitle.h"
 #endif

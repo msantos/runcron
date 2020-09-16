@@ -14,12 +14,21 @@
  */
 #include "runcron.h"
 
-#include "limit_process.h"
-#include "restrict_process.h"
-
+#include <ctype.h>
+#include <err.h>
+#include <errno.h>
 #include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <unistd.h>
+
+#include "cronevent.h"
+#include "limit_process.h"
+#include "restrict_process.h"
+#include "waitfor.h"
 
 #include "ccronexpr.h"
 

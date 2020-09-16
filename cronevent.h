@@ -1,4 +1,4 @@
-/* Copyright (c) 2019-2020, Michael Santos <michael.santos@gmail.com>
+/* Copyright (c) 2020, Michael Santos <michael.santos@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -12,23 +12,5 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-#include <sys/resource.h>
-#include <sys/time.h>
-
-typedef struct {
-  int opt;
-  int verbose;
-  rlim_t cpu;
-  rlim_t as;
-} runcron_t;
-
-enum {
-  OPT_TIMESTAMP = 1,
-  OPT_PRINT = 2,
-  OPT_DRYRUN = 4,
-  OPT_DISABLE_PROCESS_RESTRICTIONS = 8,
-  OPT_LIMIT_CPU = 16,
-  OPT_LIMIT_AS = 32,
-  OPT_DISABLE_SIGNAL_ON_EXIT = 64,
-  OPT_ALLOW_SETUID_SUBPROCESS = 128,
-};
+int cronevent(runcron_t *rp, char *cronentry, unsigned int *seconds,
+              time_t now);
