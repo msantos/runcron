@@ -14,6 +14,7 @@
  */
 #include "restrict_process.h"
 #ifdef RESTRICT_PROCESS_pledge
+#include <string.h>
 #include <unistd.h>
 
 #define PLEDGENAMES
