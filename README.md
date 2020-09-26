@@ -56,18 +56,29 @@ are supported. The seconds field is optional:
 				month          1-12 (or names, see below)
 				day of week    0-7 (0 or 7 is Sun, or use names)
 
-crontab(5) aliases also work:
+crontab(5) aliases pseudorandomly assign a run time from the alias
+interval. To run exactly at the start of the interval, use the "="
+alias variant:
 
 				string         meaning
 				------         -------
 				@reboot        Run once, at startup (see below).
-				@yearly        Run once a year, "0 0 1 1 *".
+				@yearly        Run once a year, "0 0~59 0~23 1~31 1~12 *".
 				@annually      (same as @yearly)
-				@monthly       Run once a month, "0 0 1 * *".
-				@weekly        Run once a week, "0 0 * * 0".
-				@daily         Run once a day, "0 0 * * *".
-				@midnight      (same as @daily)
-				@hourly        Run once an hour, "0 * * * *".
+				@monthly       Run once a month, "0 0~59 0~23 1~31 * *".
+				@weekly        Run once a week, "0 0~59 0~23 * * 0~7".
+				@daily         Run once a day, "0 0~59 0~23 * * *".
+				@midnight      (same as =daily)
+				@hourly        Run once an hour, "0 0~59 * * * *".
+
+				=reboot        (same as @reboot)
+				=yearly        Run once a year, "0 0 1 1 *".
+				=annually      (same as =yearly)
+				=monthly       Run once a month, "0 0 1 * *".
+				=weekly        Run once a week, "0 0 * * 0".
+				=daily         Run once a day, "0 0 * * *".
+				=midnight      (same as =daily)
+				=hourly        Run once an hour, "0 * * * *".
 
 ## crontab Expressions
 
