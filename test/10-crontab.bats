@@ -80,7 +80,7 @@ EOF
 }
 
 @test "crontab alias: daily" {
-  run runcron -np --timestamp="2018-01-24 18:18:18" "@daily" true
+  run runcron -np --timestamp="2018-01-24 18:18:18" "=daily" true
 cat << EOF
 $output
 EOF
