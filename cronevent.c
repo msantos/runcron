@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, Michael Santos <michael.santos@gmail.com>
+/* Copyright (c) 2019-2020, Michael Santos <michael.santos@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -45,12 +45,12 @@ static struct runcron_alias {
   const char *name;
   const char *timespec;
 } runcron_aliases[] = {
-    {"@yearly", "0 0~59 0~23 1~31 1~12 *"},
-    {"@annually", "0 0~59 0~23 1~31 1~12 *"},
-    {"@monthly", "0 0~59 0~23 1~31 * *"},
-    {"@weekly", "0 0~59 0~23 * * 0~7"},
-    {"@daily", "0 0~59 0~23 * * *"},
-    {"@hourly", "0 0~59 * * * *"},
+    {"@yearly", "0~59 0~59 0~23 1~31 1~12 *"},
+    {"@annually", "0~59 0~59 0~23 1~31 1~12 *"},
+    {"@monthly", "0~59 0~59 0~23 1~31 * *"},
+    {"@weekly", "0~59 0~59 0~23 * * 0~7"},
+    {"@daily", "0~59 0~59 0~23 * * *"},
+    {"@hourly", "0~59 0~59 * * * *"},
 
     {"=yearly", "0 0 0 1 1 *"},
     {"=annually", "0 0 0 1 1 *"},
