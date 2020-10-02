@@ -239,6 +239,14 @@ SIGTERM
 Signals (excluding SIGKILL) sent to runcron when the task is running
 are forwarded to the task process group.
 
+# ENVIRONMENT VARIABLES
+
+RUNCRON_EXITSTATUS
+: Task exit status of previous run
+
+RUNCRON_TIMEOUT
+: Number of seconds before task is terminated
+
 # BUILDING
 
 ## Quick Install

@@ -48,7 +48,7 @@
 #define RUNCRON_TITLE "runcron: (%s %ds) %s"
 #endif
 
-#define RUNCRON_VERSION "0.11.1"
+#define RUNCRON_VERSION "0.12.0"
 
 static int open_exit_status(char *file, int *status);
 static int read_exit_status(int fd, int *status);
@@ -57,6 +57,7 @@ void sleepfor(unsigned int seconds);
 int signal_init(void (*handler)(int));
 void sa_handler_sleep(int sig);
 void sa_handler_wait(int sig);
+static int set_env(char *key, int val);
 static void print_argv(int argc, char *argv[]);
 static int randinit(char *tag);
 static char *join(char **arg, size_t n);
@@ -274,6 +275,10 @@ int main(int argc, char *argv[]) {
       exit(111);
   }
 
+  if ((set_env("RUNCRON_TIMEOUT", timeout) < 0) ||
+      (set_env("RUNCRON_EXITSTATUS", status) < 0))
+    err(111, "set_env");
+
   if (rp->verbose >= 1) {
     print_argv(argc, argv);
     (void)fprintf(
@@ -460,6 +465,20 @@ static int read_exit_status(int fd, int *status) {
     return -1;
 
   *status = buf;
+  return 0;
+}
+
+static int set_env(char *key, int val) {
+  char str[11];
+  int rv;
+
+  rv = snprintf(str, sizeof(str), "%u", val);
+  if (rv < 0 || rv >= sizeof(str))
+    return -1;
+
+  if ((setenv(key, str, 1) < 0))
+    return -1;
+
   return 0;
 }
 
