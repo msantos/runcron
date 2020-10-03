@@ -398,8 +398,16 @@ int signal_init(void (*handler)(int)) {
   (void)sigfillset(&act.sa_mask);
 
   for (sig = 1; sig < NSIG; sig++) {
-    if (sig == SIGCHLD)
+    switch (sig) {
+    case SIGCHLD:
       continue;
+    case SIGTTIN:
+      if (signal(sig, SIG_IGN) == SIG_ERR)
+        return -1;
+      continue;
+    default:
+      break;
+    }
 
     if (sigaction(sig, &act, NULL) < 0) {
       if (errno == EINVAL)

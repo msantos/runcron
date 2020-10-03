@@ -80,6 +80,13 @@ alias variant:
 				=midnight      (same as =daily)
 				=hourly        Run once an hour, "0 * * * *".
 
+## Handling stdin
+
+Standard input is forwarded to the subprocess:
+
+    $ echo test | runcron '0~59 * * * * *' sed 's/e/3/g'
+    t3st
+
 ## crontab Expressions
 
 ### Randomized Intervals

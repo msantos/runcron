@@ -209,3 +209,13 @@ EOF
     *) skip ;;
   esac
 }
+
+@test "task: read from stdin" {
+  rm -f .runcron.reboot
+  run sh -c "echo test | runcron -f .runcron.reboot '@reboot' sed 's/e/3/g'"
+  cat << EOF
+$output
+EOF
+  [ "$status" -eq 0 ]
+  [ "$output" = "t3st" ]
+}
