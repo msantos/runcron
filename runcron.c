@@ -48,7 +48,7 @@
 #define RUNCRON_TITLE "runcron: (%s %ds) %s"
 #endif
 
-#define RUNCRON_VERSION "0.12.0"
+#define RUNCRON_VERSION "0.13.0"
 
 static int open_exit_status(char *file, int *status);
 static int read_exit_status(int fd, int *status);
@@ -310,8 +310,8 @@ int main(int argc, char *argv[]) {
   case -1:
     err(111, "fork");
   case 0:
-    if (setpgid(0, 0) < 0)
-      err(111, "setpgid");
+    if (setsid() < 0)
+      err(111, "setsid");
 
     if (restrict_process_signal_on_supervisor_exit() < 0)
       err(111, "restrict_process_signal_on_supervisor_exit");
@@ -400,10 +400,6 @@ int signal_init(void (*handler)(int)) {
   for (sig = 1; sig < NSIG; sig++) {
     switch (sig) {
     case SIGCHLD:
-      continue;
-    case SIGTTIN:
-      if (signal(sig, SIG_IGN) == SIG_ERR)
-        return -1;
       continue;
     default:
       break;
