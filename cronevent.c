@@ -206,7 +206,7 @@ static int cronexpr(runcron_t *rp, char *cronentry, unsigned int *seconds,
 
   next = cron_next(&expr, now);
   if (next == -1) {
-    warnx("error: cron_next: next scheduled interval: %s",
+    warnx("error: cron_next: %s: %s", cronentry,
           errno == 0 ? "invalid timespec" : strerror(errno));
     return -1;
   }

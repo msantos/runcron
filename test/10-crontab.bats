@@ -79,6 +79,15 @@ EOF
   [ "$output" = "runcron: error: invalid crontab timespec: Invalid number of fields, expression must consist of 6 fields" ]
 }
 
+@test "crontab format: cron_next: invalid timespec" {
+  run runcron -np "3 3 31 2 *" true
+cat << EOF
+$output
+EOF
+  [ "$status" -eq 111 ]
+  [ "$output" = 'runcron: error: cron_next: 3 3 31 2 *: invalid timespec' ]
+}
+
 @test "crontab alias: daily" {
   run runcron -np --timestamp="2018-01-24 18:18:18" "=daily" true
 cat << EOF
