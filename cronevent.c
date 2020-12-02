@@ -135,13 +135,16 @@ static int cronexpr_proc(runcron_t *rp, char *cronentry, unsigned int *sec,
 
     case (128 + SIGXCPU):
       (void)fprintf(
-          stderr, "error: cron expression parsing exceeded allotted runtime\n");
+          stderr,
+          "error: cron expression parsing exceeded allotted runtime: %s\n",
+          cronentry);
       return -1;
 
     case (128 + SIGSEGV):
       (void)fprintf(
           stderr,
-          "error: cron expression parsing exceeded allotted memory usage\n");
+          "error: cron expression parsing exceeded allotted memory usage: %s\n",
+          cronentry);
       return -1;
 
     default:
