@@ -45,10 +45,10 @@ static struct runcron_alias {
   const char *name;
   const char *timespec;
 } runcron_aliases[] = {
-    {"@yearly", "0~59 0~59 0~23 1~31 1~12 *"},
-    {"@annually", "0~59 0~59 0~23 1~31 1~12 *"},
-    {"@monthly", "0~59 0~59 0~23 1~31 * *"},
-    {"@weekly", "0~59 0~59 0~23 * * 0~7"},
+    {"@yearly", "0~59 0~59 0~23 1~28 1~12 *"},
+    {"@annually", "0~59 0~59 0~23 1~28 1~12 *"},
+    {"@monthly", "0~59 0~59 0~23 1~28 * *"},
+    {"@weekly", "0~59 0~59 0~23 * * 1~7"},
     {"@daily", "0~59 0~59 0~23 * * *"},
     {"@hourly", "0~59 0~59 * * * *"},
 

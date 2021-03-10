@@ -88,13 +88,25 @@ EOF
   [ "$output" = 'runcron: error: cron_next: 3 3 31 2 *: invalid timespec' ]
 }
 
-@test "crontab alias: daily" {
+@test "crontab alias: =daily" {
   run runcron -np --timestamp="2018-01-24 18:18:18" "=daily" true
 cat << EOF
 $output
 EOF
   [ "$status" -eq 0 ]
   [ "$output" -eq 20502 ]
+}
+
+@test "crontab alias: @monthly" {
+  run runcron -np --timestamp="2021-02-09 21:24:00" -t a "@monthly" true
+cat << EOF
+$output
+EOF
+  # now[1612923840]=Tue Feb  9 21:24:00 2021
+  # next[1614435577]=Sat Feb 27 09:19:37 2021
+  # now[1614435577]=Sat Feb 27 09:19:37 2021
+  # next[1616851177]=Sat Mar 27 09:19:37 2021
+  [ "$output" -eq 1511737 ]
 }
 
 @test "crontab alias: invalid alias" {

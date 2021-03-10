@@ -63,10 +63,10 @@ alias variant:
 				string         meaning
 				------         -------
 				@reboot        Run once, at startup (see below).
-				@yearly        Run once a year, "0~59 0~59 0~23 1~31 1~12 *".
+				@yearly        Run once a year, "0~59 0~59 0~23 1~28 1~12 *".
 				@annually      (same as @yearly)
-				@monthly       Run once a month, "0~59 0~59 0~23 1~31 * *".
-				@weekly        Run once a week, "0~59 0~59 0~23 * * 0~7".
+				@monthly       Run once a month, "0~59 0~59 0~23 1~28 * *".
+				@weekly        Run once a week, "0~59 0~59 0~23 * * 1~7".
 				@daily         Run once a day, "0~59 0~59 0~23 * * *".
 				@midnight      (same as =daily)
 				@hourly        Run once an hour, "0~59 0~59 * * * *".
