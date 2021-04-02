@@ -243,8 +243,8 @@ SIGTERM
 
 ## After exec(3)
 
-Signals (excluding SIGKILL) sent to runcron when the task is running
-are forwarded to the task process group.
+Signals (excluding SIGKILL, SIGUSR1 and SIGUSR2) received by runcron
+when the task is running are forwarded to the task process group.
 
 # ENVIRONMENT VARIABLES
 

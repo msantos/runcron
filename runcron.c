@@ -1,4 +1,4 @@
-/* Copyright (c) 2019-2020, Michael Santos <michael.santos@gmail.com>
+/* Copyright (c) 2019-2021, Michael Santos <michael.santos@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -48,7 +48,7 @@
 #define RUNCRON_TITLE "runcron: (%s %ds) %s"
 #endif
 
-#define RUNCRON_VERSION "0.13.1"
+#define RUNCRON_VERSION "0.14.0"
 
 static int open_exit_status(char *file, int *status);
 static int read_exit_status(int fd, int *status);
@@ -386,8 +386,14 @@ void sa_handler_sleep(int sig) {
 }
 
 void sa_handler_wait(int sig) {
-  if (pid > 0)
-    (void)kill(-pid, sig == SIGALRM ? default_signal : sig);
+  switch (sig) {
+  case SIGUSR1:
+  case SIGUSR2:
+    break;
+  default:
+    if (pid > 0)
+      (void)kill(-pid, sig == SIGALRM ? default_signal : sig);
+  }
 }
 
 int signal_init(void (*handler)(int)) {
