@@ -107,8 +107,16 @@ EOF
   # now[1614435577]=Sat Feb 27 09:19:37 2021
   # next[1616851177]=Sat Mar 27 09:19:37 2021
 
-  # glbc || musl
-  [ "$output" -eq 1511737 ] || [ "$output" -eq 2076481 ]
+  # The interval depends on the random(3) implementation but is constant.
+  case `uname -s` in
+    FreeBSD) [ "$output" -eq 1124427 ]  ;;
+    OpenBSD) ;&
+    Linux)
+      # glbc || musl
+      [ "$output" -eq 1511737 ] || [ "$output" -eq 2076481 ]
+      ;;
+    *) skip ;;
+  esac
 }
 
 @test "crontab alias: invalid alias" {
