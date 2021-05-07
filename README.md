@@ -41,6 +41,8 @@ the task exit status:
 
 * attempts to prevent running unkillable (setuid) subprocesses
 
+* standard input is forwarded to the task
+
 cron expressions are parsed using
 [ccronexpr](https://github.com/staticlibs/ccronexpr).
 
@@ -260,11 +262,16 @@ RUNCRON_TIMEOUT
 
     make
 
+    # to run tests: requires bats(1)
+    make clean all test
+
     # selecting method for restricting cron expression parsing
     RESTRICT_PROCESS=seccomp make
 
     #### using musl
-    RESTRICT_PROCESS=rlimit ./musl-make
+    # sudo apt install musl-dev musl-tools
+
+    RESTRICT_PROCESS=rlimit ./musl-make clean all test
 
     ## linux seccomp sandbox: requires kernel headers
 
@@ -273,7 +280,7 @@ RUNCRON_TIMEOUT
     git clone https://github.com/sabotage-linux/kernel-headers.git
 
     # then compile
-    MUSL_INCLUDE=/path/to/dir ./musl-make clean all
+    MUSL_INCLUDE=/path/to/dir ./musl-make clean all test
 
 # ALTERNATIVES
 
