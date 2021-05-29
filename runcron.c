@@ -61,7 +61,7 @@ static int set_env(char *key, int val);
 static void print_argv(int argc, char *argv[]);
 static int randinit(char *tag);
 static char *join(char **arg, size_t n);
-static void usage();
+static void usage(void);
 
 static const struct option long_options[] = {
     {"file", required_argument, NULL, 'f'},
