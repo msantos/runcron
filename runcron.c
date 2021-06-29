@@ -319,6 +319,10 @@ int main(int argc, char *argv[]) {
     (void)execvp(argv[0], argv);
     exit(127);
   default:
+    if (restrict_process_wait() < 0) {
+      err(111, "restrict_process_wait");
+    }
+
     if (signal_init(sa_handler_wait) < 0) {
       (void)kill(-pid, default_signal);
     }

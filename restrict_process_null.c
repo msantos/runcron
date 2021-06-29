@@ -1,4 +1,4 @@
-/* Copyright (c) 2019-2020, Michael Santos <michael.santos@gmail.com>
+/* Copyright (c) 2019-2021, Michael Santos <michael.santos@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -18,4 +18,5 @@ int disable_setuid_subprocess(void) { return 0; }
 int restrict_process_signal_on_supervisor_exit(void) { return 0; }
 int restrict_process_init(void) { return 0; }
 int restrict_process(void) { return 0; }
+int restrict_process_wait(void) { return 0; }
 #endif

@@ -1,4 +1,4 @@
-/* Copyright (c) 2019-2020, Michael Santos <michael.santos@gmail.com>
+/* Copyright (c) 2019-2021, Michael Santos <michael.santos@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -144,4 +144,6 @@ int restrict_process(void) {
 
   return prctl(PR_SET_SECCOMP, SECCOMP_MODE_FILTER, &prog);
 }
+
+int restrict_process_wait(void) { return 0; }
 #endif
