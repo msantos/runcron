@@ -336,8 +336,9 @@ int main(int argc, char *argv[]) {
     }
     setproctitle(RUNCRON_TITLE, "running", timeout, procname);
     if (waitfor(&status) < 0) {
+      warn("waitfor");
       (void)kill(-pid, default_signal);
-      err(111, "waitfor");
+      exit(111);
     }
     alarm(0);
   }
