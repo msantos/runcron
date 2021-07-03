@@ -42,6 +42,10 @@
 #include "setproctitle.h"
 #endif
 
+#ifdef RESTRICT_PROCESS_capsicum
+#include <sys/procdesc.h>
+#endif
+
 #ifdef HAVE_SETPROCTITLE
 #define RUNCRON_TITLE "(%s %ds) %s"
 #else
@@ -85,6 +89,7 @@ static const struct option long_options[] = {
 };
 
 pid_t pid;
+static int fdp = -1;
 int default_signal = SIGTERM;
 volatile sig_atomic_t runnow = 0;
 volatile sig_atomic_t remaining = 0;
@@ -304,7 +309,11 @@ int main(int argc, char *argv[]) {
       err(111, "write_exit_status: %s", file);
   }
 
+#ifdef RESTRICT_PROCESS_capsicum
+  pid = pdfork(&fdp, PD_CLOEXEC);
+#else
   pid = fork();
+#endif
 
   switch (pid) {
   case -1:
@@ -319,12 +328,16 @@ int main(int argc, char *argv[]) {
     (void)execvp(argv[0], argv);
     exit(127);
   default:
-    if (restrict_process_wait() < 0) {
+    if (restrict_process_wait(fdp) < 0) {
       err(111, "restrict_process_wait");
     }
 
     if (signal_init(sa_handler_wait) < 0) {
+#ifdef RESTRICT_PROCESS_capsicum
+      (void)pdkill(fdp, default_signal);
+#else
       (void)kill(-pid, default_signal);
+#endif
     }
     if (rp->verbose >= 1) {
       print_argv(argc, argv);
@@ -335,9 +348,13 @@ int main(int argc, char *argv[]) {
       alarm(timeout);
     }
     setproctitle(RUNCRON_TITLE, "running", timeout, procname);
-    if (waitfor(&status) < 0) {
+    if (waitfor(fdp, &status) < 0) {
       warn("waitfor");
+#ifdef RESTRICT_PROCESS_capsicum
+      (void)pdkill(fdp, default_signal);
+#else
       (void)kill(-pid, default_signal);
+#endif
       exit(111);
     }
     alarm(0);
@@ -355,7 +372,11 @@ int main(int argc, char *argv[]) {
     err(111, "write_exit_status: %s", file);
 
   if (signal_on_exit) {
+#ifdef RESTRICT_PROCESS_capsicum
+    (void)pdkill(fdp, default_signal);
+#else
     (void)kill(-pid, default_signal);
+#endif
   }
 
   exit(exit_value);
@@ -395,7 +416,11 @@ void sa_handler_wait(int sig) {
     break;
   default:
     if (pid > 0)
+#ifdef RESTRICT_PROCESS_capsicum
+      (void)pdkill(fdp, sig == SIGALRM ? default_signal : sig);
+#else
       (void)kill(-pid, sig == SIGALRM ? default_signal : sig);
+#endif
   }
 }
 

@@ -145,5 +145,8 @@ int restrict_process(void) {
   return prctl(PR_SET_SECCOMP, SECCOMP_MODE_FILTER, &prog);
 }
 
-int restrict_process_wait(void) { return 0; }
+int restrict_process_wait(int fdp) {
+  (void)fdp;
+  return 0;
+}
 #endif

@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, Michael Santos <michael.santos@gmail.com>
+/* Copyright (c) 2019-2021, Michael Santos <michael.santos@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -15,4 +15,4 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-int waitfor(int *status);
+int waitfor(int fdp, int *status);

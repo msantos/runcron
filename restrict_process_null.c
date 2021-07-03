@@ -18,5 +18,8 @@ int disable_setuid_subprocess(void) { return 0; }
 int restrict_process_signal_on_supervisor_exit(void) { return 0; }
 int restrict_process_init(void) { return 0; }
 int restrict_process(void) { return 0; }
-int restrict_process_wait(void) { return 0; }
+int restrict_process_wait(int fdp) {
+  (void)fdp;
+  return 0;
+}
 #endif

@@ -52,5 +52,34 @@ int restrict_process(void) {
   return cap_enter();
 }
 
-int restrict_process_wait(void) { return 0; }
+int restrict_process_wait(int fdp) {
+  struct rlimit rl = {0};
+  cap_rights_t policy_read;
+  cap_rights_t policy_write;
+  cap_rights_t policy_rw;
+
+  if (setrlimit(RLIMIT_NPROC, &rl) < 0)
+    return -1;
+
+  if (cap_enter() == -1)
+    return -1;
+
+  (void)cap_rights_init(&policy_read, CAP_READ);
+  (void)cap_rights_init(&policy_write, CAP_WRITE);
+  (void)cap_rights_init(&policy_rw, CAP_READ, CAP_WRITE, CAP_EVENT, CAP_PDKILL);
+
+  if (cap_rights_limit(STDIN_FILENO, &policy_read) < 0)
+    return -1;
+
+  if (cap_rights_limit(STDOUT_FILENO, &policy_write) < 0)
+    return -1;
+
+  if (cap_rights_limit(STDERR_FILENO, &policy_write) < 0)
+    return -1;
+
+  if (cap_rights_limit(fdp, &policy_rw) < 0)
+    return -1;
+
+  return 0;
+}
 #endif

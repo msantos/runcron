@@ -1,4 +1,4 @@
-/* Copyright (c) 2019-2020, Michael Santos <michael.santos@gmail.com>
+/* Copyright (c) 2019-2021, Michael Santos <michael.santos@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -24,6 +24,10 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+
+#ifdef RESTRICT_PROCESS_capsicum
+#include <sys/procdesc.h>
+#endif
 
 #include "cronevent.h"
 #include "limit_process.h"
@@ -83,11 +87,16 @@ static int cronexpr_proc(runcron_t *rp, char *cronentry, unsigned int *sec,
   int status;
   int exit_value = 0;
   int n;
+  int fdp = -1;
 
   if (socketpair(AF_UNIX, SOCK_STREAM, 0, sv) < 0)
     return -1;
 
+#ifdef RESTRICT_PROCESS_capsicum
+  pid = pdfork(&fdp, PD_CLOEXEC);
+#else
   pid = fork();
+#endif
 
   switch (pid) {
   case -1:
@@ -121,7 +130,7 @@ static int cronexpr_proc(runcron_t *rp, char *cronentry, unsigned int *sec,
     if (close(sv[1]) < 0)
       return -1;
 
-    if (waitfor(&status) < 0)
+    if (waitfor(fdp, &status) < 0)
       return -1;
 
     if (WIFEXITED(status))

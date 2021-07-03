@@ -15,5 +15,5 @@
 int disable_setuid_subprocess(void);
 int restrict_process_init(void);
 int restrict_process(void);
-int restrict_process_wait(void);
+int restrict_process_wait(int fdp);
 int restrict_process_signal_on_supervisor_exit(void);

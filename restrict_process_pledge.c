@@ -38,5 +38,8 @@ int restrict_process_init(void) {
   return pledge("stdio exec proc rpath wpath cpath flock", NULL);
 }
 int restrict_process(void) { return pledge("stdio", NULL); }
-int restrict_process_wait(void) { return pledge("stdio proc", NULL); }
+int restrict_process_wait(int fdp) {
+  (void)fdp;
+  return pledge("stdio proc", NULL);
+}
 #endif

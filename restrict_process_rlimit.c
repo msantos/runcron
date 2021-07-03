@@ -34,5 +34,8 @@ int restrict_process(void) {
 
   return setrlimit(RLIMIT_NOFILE, &rl_zero);
 }
-int restrict_process_wait(void) { return 0; }
+int restrict_process_wait(int fdp) {
+  (void)fdp;
+  return 0;
+}
 #endif

@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, Michael Santos <michael.santos@gmail.com>
+/* Copyright (c) 2019-2021, Michael Santos <michael.santos@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -15,9 +15,40 @@
 #include <errno.h>
 #include <signal.h>
 
+#ifdef RESTRICT_PROCESS_capsicum
+#include <stdlib.h>
+#include <sys/event.h>
+#endif
+
 #include "waitfor.h"
 
-int waitfor(int *status) {
+int waitfor(int fdp, int *status) {
+#ifdef RESTRICT_PROCESS_capsicum
+  struct kevent event;
+  int kq;
+  int rv;
+
+  kq = kqueue();
+  if (kq == -1)
+    return -1;
+
+  EV_SET(&event, fdp, EVFILT_PROCDESC, EV_ADD | EV_CLEAR | EV_ONESHOT,
+         NOTE_EXIT, 0, NULL);
+
+  rv = kevent(kq, &event, 1, &event, 1, NULL);
+  if (rv == -1) {
+    switch (errno) {
+    case EINTR:
+      return 0;
+    default:
+      return -1;
+    }
+  }
+
+  *status = (int)event.data;
+  return 0;
+#else
+  (void)fdp;
   for (;;) {
     errno = 0;
     if (wait(status) < 0) {
@@ -27,4 +58,5 @@ int waitfor(int *status) {
     }
     return 0;
   }
+#endif
 }
