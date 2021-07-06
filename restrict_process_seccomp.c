@@ -146,7 +146,74 @@ int restrict_process(void) {
 }
 
 int restrict_process_wait(int fdp) {
+  struct sock_filter filter[] = {
+      /* Ensure the syscall arch convention is as expected. */
+      BPF_STMT(BPF_LD + BPF_W + BPF_ABS, offsetof(struct seccomp_data, arch)),
+      BPF_JUMP(BPF_JMP + BPF_JEQ + BPF_K, SECCOMP_AUDIT_ARCH, 1, 0),
+      BPF_STMT(BPF_RET + BPF_K, SECCOMP_FILTER_FAIL),
+      /* Load the syscall number for checking. */
+      BPF_STMT(BPF_LD + BPF_W + BPF_ABS, offsetof(struct seccomp_data, nr)),
+
+  /* Syscalls to non-fatally deny */
+
+  /* Syscalls to allow */
+#ifdef __NR_exit_group
+      SC_ALLOW(exit_group),
+#endif
+
+  /* stdio */
+#ifdef __NR_write
+      SC_ALLOW(write),
+#endif
+#ifdef __NR_writev
+      SC_ALLOW(writev),
+#endif
+
+#ifdef __NR_restart_syscall
+      SC_ALLOW(restart_syscall),
+#endif
+
+#ifdef __NR_rt_sigaction
+      SC_ALLOW(rt_sigaction),
+#endif
+#ifdef __NR_rt_sigprocmask
+      SC_ALLOW(rt_sigprocmask),
+#endif
+#ifdef __NR_sigprocmask
+      SC_ALLOW(sigprocmask),
+#endif
+#ifdef __NR_rt_sigreturn
+      SC_ALLOW(rt_sigreturn),
+#endif
+#ifdef __NR_sigreturn
+      SC_ALLOW(sigreturn),
+#endif
+#ifdef __NR_wait4
+      SC_ALLOW(wait4),
+#endif
+#ifdef __NR_alarm
+      SC_ALLOW(alarm),
+#endif
+#ifdef __NR_setitimer
+      SC_ALLOW(setitimer),
+#endif
+#ifdef __NR_lseek
+      SC_ALLOW(lseek),
+#endif
+#ifdef __NR_kill
+      SC_ALLOW(kill),
+#endif
+
+      /* Default deny */
+      BPF_STMT(BPF_RET + BPF_K, SECCOMP_FILTER_FAIL)};
+
+  struct sock_fprog prog = {
+      .len = (unsigned short)(sizeof(filter) / sizeof(filter[0])),
+      .filter = filter,
+  };
+
   (void)fdp;
-  return 0;
+
+  return prctl(PR_SET_SECCOMP, SECCOMP_MODE_FILTER, &prog);
 }
 #endif
