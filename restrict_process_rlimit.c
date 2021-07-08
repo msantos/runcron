@@ -35,7 +35,13 @@ int restrict_process(void) {
   return setrlimit(RLIMIT_NOFILE, &rl_zero);
 }
 int restrict_process_wait(int fdp) {
+  struct rlimit rl_zero = {0};
+
   (void)fdp;
-  return 0;
+
+  if (setrlimit(RLIMIT_NPROC, &rl_zero) < 0)
+    return -1;
+
+  return setrlimit(RLIMIT_NOFILE, &rl_zero);
 }
 #endif

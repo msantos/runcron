@@ -52,7 +52,7 @@
 #define RUNCRON_TITLE "runcron: (%s %ds) %s"
 #endif
 
-#define RUNCRON_VERSION "0.14.0"
+#define RUNCRON_VERSION "0.15.0"
 
 static int open_exit_status(char *file, int *status);
 static int read_exit_status(int fd, int *status);
