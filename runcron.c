@@ -511,7 +511,7 @@ static int set_env(char *key, int val) {
   int rv;
 
   rv = snprintf(str, sizeof(str), "%u", val);
-  if (rv < 0 || rv >= sizeof(str))
+  if (rv < 0 || (unsigned)rv >= sizeof(str))
     return -1;
 
   if ((setenv(key, str, 1) < 0))
