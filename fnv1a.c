@@ -1,6 +1,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "fnv1a.h"
+
 static const uint32_t fnv1a32_prime = 16777619;
 static const uint32_t fnv1a32_offset = 2166136261U;
 

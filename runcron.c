@@ -22,6 +22,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdnoreturn.h>
 #include <string.h>
 #include <sys/file.h>
 #include <sys/param.h>
@@ -65,7 +66,7 @@ static int set_env(char *key, int val);
 static void print_argv(int argc, char *argv[]);
 static int randinit(char *tag);
 static char *join(char **arg, size_t n);
-static void usage(void);
+static noreturn void usage(void);
 
 static const struct option long_options[] = {
     {"file", required_argument, NULL, 'f'},
@@ -88,11 +89,11 @@ static const struct option long_options[] = {
     {NULL, 0, NULL, 0},
 };
 
-pid_t pid;
+static pid_t pid;
 static int fdp = -1;
-int default_signal = SIGTERM;
-volatile sig_atomic_t runnow = 0;
-volatile sig_atomic_t remaining = 0;
+static int default_signal = SIGTERM;
+static volatile sig_atomic_t runnow = 0;
+static volatile sig_atomic_t remaining = 0;
 
 int main(int argc, char *argv[]) {
   runcron_t *rp;
@@ -606,7 +607,7 @@ ERR:
   return NULL;
 }
 
-static void usage() {
+static noreturn void usage() {
   errx(EXIT_FAILURE,
        "[OPTION] <CRONTAB EXPRESSION> <command> <arg> <...>\n"
        "version: %s (using %s mode process restriction)\n\n"
