@@ -200,6 +200,9 @@ int restrict_process_wait(int fdp) {
 #ifdef __NR_lseek
       SC_ALLOW(lseek),
 #endif
+#ifdef __NR__llseek
+      SC_ALLOW(_llseek),
+#endif
 #ifdef __NR_kill
       SC_ALLOW(kill),
 #endif

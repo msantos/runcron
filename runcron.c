@@ -1,4 +1,4 @@
-/* Copyright (c) 2019-2021, Michael Santos <michael.santos@gmail.com>
+/* Copyright (c) 2019-2022, Michael Santos <michael.santos@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -53,7 +53,7 @@
 #define RUNCRON_TITLE "runcron: (%s %ds) %s"
 #endif
 
-#define RUNCRON_VERSION "0.15.0"
+#define RUNCRON_VERSION "0.15.1"
 
 static int open_exit_status(char *file, int *status);
 static int read_exit_status(int fd, int *status);
