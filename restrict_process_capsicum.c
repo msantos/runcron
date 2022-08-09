@@ -1,4 +1,4 @@
-/* Copyright (c) 2019-2021, Michael Santos <michael.santos@gmail.com>
+/* Copyright (c) 2019-2022, Michael Santos <michael.santos@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -21,9 +21,18 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <sys/procctl.h>
+
 #include <errno.h>
 
-int disable_setuid_subprocess(void) { return 0; }
+int disable_setuid_subprocess(void) {
+#ifdef PROC_NO_NEW_PRIVS_CTL
+    int data = PROC_NO_NEW_PRIVS_ENABLE;
+    return procctl(P_PID, 0, PROC_NO_NEW_PRIVS_CTL, &data);
+#else
+    return 0;
+#endif
+}
 
 int restrict_process_signal_on_supervisor_exit(void) { return 0; }
 
