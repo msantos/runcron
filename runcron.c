@@ -53,7 +53,7 @@
 #define RUNCRON_TITLE "runcron: (%s %ds) %s"
 #endif
 
-#define RUNCRON_VERSION "0.16.0"
+#define RUNCRON_VERSION "0.16.1"
 
 static int open_exit_status(char *file, int *status);
 static int read_exit_status(int fd, int *status);
@@ -85,6 +85,7 @@ static const struct option long_options[] = {
      OPT_DISABLE_PROCESS_RESTRICTIONS},
     {"disable-signal-on-exit", no_argument, NULL, OPT_DISABLE_SIGNAL_ON_EXIT},
     {"verbose", no_argument, NULL, 'v'},
+    {"version", no_argument, NULL, 'V'},
     {"help", no_argument, NULL, 'h'},
     {NULL, 0, NULL, 0},
 };
@@ -142,7 +143,7 @@ int main(int argc, char *argv[]) {
 
   (void)localtime(&now);
 
-  while ((ch = getopt_long(argc, argv, "+C:f:hnpP:s:t:T:v", long_options,
+  while ((ch = getopt_long(argc, argv, "+C:f:hnpP:s:t:T:vV", long_options,
                            NULL)) != -1) {
     switch (ch) {
     case 'C':
@@ -185,6 +186,11 @@ int main(int argc, char *argv[]) {
 
     case 'v':
       rp->verbose++;
+      break;
+
+    case 'V':
+      (void)printf("%s\n", RUNCRON_VERSION);
+      exit(EXIT_SUCCESS);
       break;
 
     case OPT_ALLOW_SETUID_SUBPROCESS:
@@ -622,6 +628,7 @@ static noreturn void usage() {
        "                                (default: 15)\n"
        "-t, --tag <string>            seed used for random intervals\n"
        "-v, --verbose                 verbose mode\n"
+       "-V, --version                 runcron version\n"
        "    --limit-cpu <uint32>      restrict cpu usage of cron expression\n"
        "                                parsing\n"
        "    --limit-as <uint32>       restrict memory (address space) of cron\n"
