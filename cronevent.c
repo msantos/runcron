@@ -1,4 +1,4 @@
-/* Copyright (c) 2019-2021, Michael Santos <michael.santos@gmail.com>
+/* Copyright (c) 2019-2022, Michael Santos <michael.santos@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -115,7 +115,7 @@ static int cronexpr_proc(runcron_t *rp, char *cronentry, unsigned int *sec,
       exit(111);
     exit_value = cronexpr(rp, cronentry, &seconds, now);
     if (exit_value < 0)
-      _exit(1);
+      _exit(128);
 
     while ((n = write(sv[1], &seconds, sizeof(seconds))) == -1 &&
            errno == EINTR)
