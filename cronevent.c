@@ -187,7 +187,7 @@ static int cronexpr(runcron_t *rp, char *cronentry, unsigned int *seconds,
   int rv;
 
   rv = snprintf(arg, sizeof(arg), "%s", cronentry);
-  if (rv < 0 || rv >= sizeof(arg)) {
+  if (rv < 0 || (unsigned)rv >= sizeof(arg)) {
     warnx("error: timespec exceeds maximum length: %zu", sizeof(arg));
     return -1;
   }
@@ -285,7 +285,7 @@ static int arg_to_timespec(const char *arg, size_t arglen, char *buf,
     break;
   }
 
-  return (rv < 0 || rv >= buflen) ? -1 : 0;
+  return (rv < 0 || (unsigned)rv >= buflen) ? -1 : 0;
 }
 
 static const char *alias_to_timespec(const char *name) {
