@@ -226,12 +226,12 @@ runcron -f /tmp/reboot/runcron.lock ...
 
 # SIGNALS
 
-## Before exec(3)
+## Waiting for Job
 
-Before the task is `exec(3)`ed, signals sent to runcron are ignored
+While the task is waiting to run, signals sent to runcron are ignored
 except for:
 
-SIGUSR1
+SIGUSR1/SIGALRM
 : Run the job immediately
 
 SIGUSR2
@@ -243,10 +243,10 @@ SIGINT
 SIGTERM
 : Exit with status 111
 
-## After exec(3)
+## Running Job
 
-Signals (excluding SIGKILL, SIGUSR1 and SIGUSR2) received by runcron
-when the task is running are forwarded to the task process group.
+When the task is running, signals (excluding SIGKILL, SIGALRM, SIGUSR1
+and SIGUSR2) received by runcron are forwarded to the task process group.
 
 # ENVIRONMENT VARIABLES
 
