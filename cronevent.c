@@ -1,4 +1,4 @@
-/* Copyright (c) 2019-2022, Michael Santos <michael.santos@gmail.com>
+/* Copyright (c) 2019-2023, Michael Santos <michael.santos@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,7 +14,6 @@
  */
 #include "runcron.h"
 
-#include <ctype.h>
 #include <err.h>
 #include <errno.h>
 #include <signal.h>
@@ -194,7 +193,7 @@ static int cronexpr(runcron_t *rp, char *cronentry, unsigned int *seconds,
 
   /* replace tabs with spaces */
   for (p = arg; *p != '\0'; p++)
-    if (isspace(*p))
+    if (*p == '\t' || *p == '\n' || *p == '\r')
       *p = ' ';
 
   if (arg_to_timespec(arg, sizeof(arg), buf, sizeof(buf)) < 0) {
