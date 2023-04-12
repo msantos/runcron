@@ -52,7 +52,7 @@
 #define RUNCRON_TITLE "runcron: (%s %ds) %s"
 #endif
 
-#define RUNCRON_VERSION "0.18.0"
+#define RUNCRON_VERSION "0.19.0"
 
 static int open_exit_status(char *file, int *status);
 static int read_exit_status(int fd, int *status);
@@ -72,6 +72,7 @@ static const struct option long_options[] = {
     {"chdir", required_argument, NULL, 'C'},
     {"tag", required_argument, NULL, 't'},
     {"timeout", required_argument, NULL, 'T'},
+    {"retry-interval", required_argument, NULL, 'R'},
     {"poll-interval", required_argument, NULL, 'P'},
     {"dryrun", no_argument, NULL, 'n'},
     {"print", no_argument, NULL, 'p'},
@@ -106,7 +107,7 @@ int main(int argc, char *argv[]) {
   time_t now;
   unsigned int seconds;
   unsigned int timeout = 0;
-  int32_t poll_interval = 3600; /* 1 hour */
+  int32_t retry_interval = 3600; /* 1 hour */
   const char *errstr;
   int exit_value = 0;
   int signal_on_exit = 1;
@@ -142,7 +143,7 @@ int main(int argc, char *argv[]) {
 
   (void)localtime(&now);
 
-  while ((ch = getopt_long(argc, argv, "+C:f:hnpP:s:t:T:vV", long_options,
+  while ((ch = getopt_long(argc, argv, "+C:f:hnpP:R:s:t:T:vV", long_options,
                            NULL)) != -1) {
     switch (ch) {
     case 'C':
@@ -161,8 +162,9 @@ int main(int argc, char *argv[]) {
       rp->opt |= OPT_PRINT;
       break;
 
-    case 'P':
-      poll_interval = strtonum(optarg, 0, INT_MAX, &errstr);
+    case 'P': /* deprecated: use -R */
+    case 'R':
+      retry_interval = strtonum(optarg, 0, INT_MAX, &errstr);
       if (errno)
         err(2, "strtonum: %s: %s", optarg, errstr);
       break;
@@ -276,8 +278,8 @@ int main(int argc, char *argv[]) {
   }
 
   if (status != 0) {
-    if (seconds > poll_interval) {
-      seconds = poll_interval;
+    if (seconds > retry_interval) {
+      seconds = retry_interval;
     }
   }
 
@@ -628,30 +630,27 @@ static void usage() {
       stderr,
       "[OPTION] <CRONTAB EXPRESSION> <command> <arg> <...>\n"
       "version: %s (using %s mode process restriction)\n\n"
-      "-f, --file <file>             lock file path (default: .runcron.lock)\n"
-      "-T, --timeout <seconds>       specify command timeout (seconds)\n"
-      "-P, --poll-interval <seconds> interval to retry failed command\n"
-      "                                (default: 3600 seconds)\n"
-      "-C, --chdir <path>            change working directory\n"
-      "-n, --dryrun                  do nothing\n"
-      "-p, --print                   output seconds to next timespec\n"
-      "-s, --signal <signum>         signal sent task on timeout\n"
-      "                                (default: 15)\n"
-      "-t, --tag <string>            seed used for random intervals\n"
-      "-v, --verbose                 verbose mode\n"
-      "-V, --version                 runcron version\n"
-      "    --limit-cpu <uint32>      restrict cpu usage of cron expression\n"
-      "                                parsing\n"
-      "    --limit-as <uint32>       restrict memory (address space) of cron\n"
-      "                                expression parsing\n"
-      "    --allow-setuid-subprocess\n"
-      "                              allow running unkillable tasks\n"
+      "-f, --file <file>              lock file path (default: .runcron.lock)\n"
+      "-T, --timeout <seconds>        specify command timeout\n"
+      "-R, --retry-interval <seconds> retry failed command (default: 3600)\n"
+      "-C, --chdir <path>             change working directory\n"
+      "-n, --dryrun                   do nothing\n"
+      "-p, --print                    output seconds to next timespec\n"
+      "-s, --signal <signum>          signal sent task on timeout (default: "
+      "15)\n"
+      "-t, --tag <string>             seed used for random intervals\n"
+      "-v, --verbose                  verbose mode\n"
+      "-V, --version                  runcron version\n"
+      "    --limit-cpu <uint32>       restrict cpu usage of cron expression\n"
+      "                                 parsing\n"
+      "    --limit-as <uint32>        restrict memory (address space) of cron\n"
+      "                                 expression parsing\n"
+      "    --allow-setuid-subprocess  allow running unkillable tasks\n"
       "    --disable-process-restrictions\n"
-      "                              do not fork cron expression processing\n"
-      "    --disable-signal-on-exit\n"
-      "                              disable termination of subprocesses on "
+      "                               do not fork cron expression processing\n"
+      "    --disable-signal-on-exit   disable termination of subprocesses on "
       "exit\n"
       "    --timestamp <YY-MM-DD hh-mm-ss|@epoch>\n"
-      "                              set current time\n",
+      "                               set current time\n",
       RUNCRON_VERSION, RESTRICT_PROCESS);
 }

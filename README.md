@@ -118,7 +118,7 @@ The `@reboot` alias runs the task immediately. The behaviour of subsequent
 attempts to run the task depends on the exit status of the previous run:
 
 * 0: runcron will not run the task and sleep indefinitely
-* non-0: runcron will rerun the task after `--poll-interval` seconds
+* non-0: runcron will rerun the task after `--retry-interval` seconds
   (default: 3600)
 
 Since the runcron state is written to a file (see `-f` option), the
@@ -173,7 +173,7 @@ runcron -f /tmp/reboot/runcron.lock ...
 : specify command timeout in seconds (-1 to disable, default: next
   cron interval)
 
--P, --poll-interval
+-R, --retry-interval
 : interval to retry failed commands (default: 3600s)
 
 -n, --dryrun
