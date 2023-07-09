@@ -51,7 +51,7 @@ endif
 RM ?= rm
 
 RESTRICT_PROCESS ?= rlimit
-RUNCRON_CFLAGS ?= -g -Wall -fwrapv -pedantic
+RUNCRON_CFLAGS ?= -g -Wall -Wextra -fwrapv -pedantic -Wno-unused-parameter
 
 CFLAGS += $(RUNCRON_CFLAGS) \
           -DCRON_USE_LOCAL_TIME \
