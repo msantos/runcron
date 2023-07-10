@@ -52,7 +52,7 @@
 #define RUNCRON_TITLE "runcron: (%s %ds) %s"
 #endif
 
-#define RUNCRON_VERSION "0.19.2"
+#define RUNCRON_VERSION "0.19.3"
 
 static int open_exit_status(char *file, int *status);
 static int read_exit_status(int fd, int *status);
@@ -167,14 +167,16 @@ int main(int argc, char *argv[]) {
       errno = 0;
       retry_interval = strtonum(optarg, 0, INT_MAX, &errstr);
       if (errno)
-        err(2, "strtonum: %s: %s", optarg, errstr);
+        err(2, "strtonum: %s: %s", optarg,
+            errstr == NULL ? "no error" : errstr);
       break;
 
     case 's':
       errno = 0;
       default_signal = strtonum(optarg, 0, NSIG, &errstr);
       if (errno)
-        err(2, "strtonum: %s: %s", optarg, errstr);
+        err(2, "strtonum: %s: %s", optarg,
+            errstr == NULL ? "no error" : errstr);
       break;
 
     case 't':
@@ -185,7 +187,8 @@ int main(int argc, char *argv[]) {
       errno = 0;
       timeout = strtonum(optarg, -1, UINT32_MAX, &errstr);
       if (errno)
-        err(2, "strtonum: %s: %s", optarg, errstr);
+        err(2, "strtonum: %s: %s", optarg,
+            errstr == NULL ? "no error" : errstr);
       break;
 
     case 'v':
@@ -205,14 +208,16 @@ int main(int argc, char *argv[]) {
       errno = 0;
       rp->cpu = strtonum(optarg, -1, UINT32_MAX, &errstr);
       if (errno)
-        err(2, "strtonum: %s: %s", optarg, errstr);
+        err(2, "strtonum: %s: %s", optarg,
+            errstr == NULL ? "no error" : errstr);
       break;
 
     case OPT_LIMIT_AS:
       errno = 0;
       rp->as = strtonum(optarg, -1, UINT32_MAX, &errstr);
       if (errno)
-        err(2, "strtonum: %s: %s", optarg, errstr);
+        err(2, "strtonum: %s: %s", optarg,
+            errstr == NULL ? "no error" : errstr);
       break;
 
     case OPT_TIMESTAMP:
