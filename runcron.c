@@ -108,7 +108,7 @@ int main(int argc, char *argv[]) {
   unsigned int seconds;
   unsigned int timeout = 0;
   unsigned int retry_interval = 3600; /* 1 hour */
-  const char *errstr;
+  const char *errstr = NULL;
   int exit_value = 0;
   int signal_on_exit = 1;
   int allow_setuid_subprocess = 0;
@@ -166,17 +166,15 @@ int main(int argc, char *argv[]) {
     case 'R':
       errno = 0;
       retry_interval = strtonum(optarg, 0, INT_MAX, &errstr);
-      if (errno)
-        err(2, "strtonum: %s: %s", optarg,
-            errstr == NULL ? "no error" : errstr);
+      if (errstr != NULL)
+        err(2, "strtonum: %s: %s", optarg, errstr);
       break;
 
     case 's':
       errno = 0;
       default_signal = strtonum(optarg, 0, NSIG, &errstr);
-      if (errno)
-        err(2, "strtonum: %s: %s", optarg,
-            errstr == NULL ? "no error" : errstr);
+      if (errstr != NULL)
+        err(2, "strtonum: %s: %s", optarg, errstr);
       break;
 
     case 't':
@@ -186,9 +184,8 @@ int main(int argc, char *argv[]) {
     case 'T':
       errno = 0;
       timeout = strtonum(optarg, -1, UINT32_MAX, &errstr);
-      if (errno)
-        err(2, "strtonum: %s: %s", optarg,
-            errstr == NULL ? "no error" : errstr);
+      if (errstr != NULL)
+        err(2, "strtonum: %s: %s", optarg, errstr);
       break;
 
     case 'v':
@@ -207,17 +204,15 @@ int main(int argc, char *argv[]) {
     case OPT_LIMIT_CPU:
       errno = 0;
       rp->cpu = strtonum(optarg, -1, UINT32_MAX, &errstr);
-      if (errno)
-        err(2, "strtonum: %s: %s", optarg,
-            errstr == NULL ? "no error" : errstr);
+      if (errstr != NULL)
+        err(2, "strtonum: %s: %s", optarg, errstr);
       break;
 
     case OPT_LIMIT_AS:
       errno = 0;
       rp->as = strtonum(optarg, -1, UINT32_MAX, &errstr);
-      if (errno)
-        err(2, "strtonum: %s: %s", optarg,
-            errstr == NULL ? "no error" : errstr);
+      if (errstr != NULL)
+        err(2, "strtonum: %s: %s", optarg, errstr);
       break;
 
     case OPT_TIMESTAMP:
