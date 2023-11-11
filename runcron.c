@@ -63,6 +63,7 @@ void sa_handler_sleep(int sig, siginfo_t *info, void *context);
 void sa_handler_wait(int sig, siginfo_t *info, void *context);
 static int set_env(char *key, int val);
 static void print_argv(int argc, char *argv[]);
+static uint32_t seed_from_time(void);
 static int randinit(char *tag);
 static char *join(char **arg, size_t n);
 static void usage(void);
@@ -553,6 +554,14 @@ static void print_argv(int argc, char *argv[]) {
   }
 }
 
+static uint32_t seed_from_time(void) {
+  struct timeval tv = {0};
+
+  (void)gettimeofday(&tv, NULL);
+
+  return getpid() ^ tv.tv_sec ^ tv.tv_usec;
+}
+
 static int randinit(char *tag) {
   uint32_t seed;
   char name[MAXHOSTNAMELEN] = {0};
@@ -565,15 +574,7 @@ static int randinit(char *tag) {
   }
 
   len = strlen(tag);
-
-  if (len == 0) {
-    struct timeval tv = {0};
-    if (gettimeofday(&tv, NULL) < 0)
-      return -1;
-    seed = getpid() ^ tv.tv_sec ^ tv.tv_usec;
-  } else {
-    seed = fnv1a((uint8_t *)tag, len);
-  }
+  seed = len == 0 ? seed_from_time() : fnv1a((uint8_t *)tag, len);
 
 #if defined(__OpenBSD__)
   srandom_deterministic(seed);
