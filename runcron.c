@@ -343,7 +343,7 @@ int main(int argc, char *argv[]) {
       err(111, "restrict_process_signal_on_supervisor_exit");
 
     (void)execvp(argv[0], argv);
-    exit(127);
+    exit(errno == ENOENT ? 127 : 126);
   default:
     if (restrict_process_wait(fdp) < 0) {
       err(111, "restrict_process_wait");
