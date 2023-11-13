@@ -199,7 +199,7 @@ runcron -f /tmp/reboot/runcron.lock ...
   pseudorandomly chosen based on the current time. The job timeout will
   also be random.
 
-  Default: hostname
+  Default: hostname (see `RUNCRON_TAG`)
 
 -v, --verbose
 : verbose mode
@@ -249,6 +249,14 @@ When the task is running, signals (excluding SIGKILL, SIGALRM, SIGUSR1
 and SIGUSR2) received by runcron are forwarded to the task process group.
 
 # ENVIRONMENT VARIABLES
+
+RUNCRON_TAG
+: Sets the default value for the `-t/--tag` option: if unset, the hostname
+  is used
+
+## Read-only
+
+runcron sets these values before executing the subprocess:
 
 RUNCRON_EXITSTATUS
 : Task exit status of previous run

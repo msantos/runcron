@@ -52,7 +52,7 @@
 #define RUNCRON_TITLE "runcron: (%s %ds) %s"
 #endif
 
-#define RUNCRON_VERSION "0.19.3"
+#define RUNCRON_VERSION "0.19.4"
 
 static int open_exit_status(char *file, int *status);
 static int read_exit_status(int fd, int *status);
@@ -137,6 +137,8 @@ int main(int argc, char *argv[]) {
 
   rp->cpu = 10;
   rp->as = 1 * 1024 * 1024;
+
+  tag = getenv("RUNCRON_TAG");
 
   now = time(NULL);
   if (now == -1)
