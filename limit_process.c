@@ -1,4 +1,4 @@
-/* Copyright (c) 2019-2021, Michael Santos <michael.santos@gmail.com>
+/* Copyright (c) 2019-2023, Michael Santos <michael.santos@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -19,7 +19,7 @@
 #include "limit_process.h"
 
 int limit_process(runcron_t *rp) {
-  struct rlimit rl = {0};
+  struct rlimit rl;
 
 #ifdef RLIMIT_CPU
   if (getrlimit(RLIMIT_CPU, &rl) < 0)
