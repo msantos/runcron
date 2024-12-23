@@ -11,6 +11,6 @@ esac
 
 export MUSL_INCLUDE="${MUSL_INCLUDE-/usr/local/lib}"
 export RUNCRON_LDFLAGS="-I$MUSL_INCLUDE/kernel-headers/generic/include -I$MUSL_INCLUDE/kernel-headers/${MACHTYPE}/include"
-export RUNCRON_CFLAGS="-g -Wall -fwrapv -pedantic -no-pie"
+export RUNCRON_CFLAGS="-g -Wall -fwrapv -pedantic"
 export CC="musl-gcc -static -Os"
 exec make $@
