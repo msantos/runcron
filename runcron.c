@@ -633,7 +633,7 @@ ERR:
   return NULL;
 }
 
-static void usage() {
+static void usage(void) {
   (void)fprintf(
       stderr,
       "[OPTION] <CRONTAB EXPRESSION> <command> <arg> <...>\n"
