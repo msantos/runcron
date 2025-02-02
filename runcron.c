@@ -1,4 +1,4 @@
-/* Copyright (c) 2019-2024, Michael Santos <michael.santos@gmail.com>
+/* Copyright (c) 2019-2025, Michael Santos <michael.santos@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -265,7 +265,7 @@ int main(int argc, char *argv[]) {
   if (cronevent(rp, cronentry, &seconds, now) < 0)
     exit(111);
 
-  /* @reboot:if the runcron state file doesn't exit, set the exit status
+  /* @reboot:if the runcron state file doesn't exist, set the exit status
    * to 255. */
   if (seconds == UINT32_MAX)
     status = 255;
