@@ -27,22 +27,14 @@ svscan,17276,17276 service/
 ```
 
 `runcron` supervises tasks:
-
 * only allows a single instance of a job to run
-
 * job runtime is limited to the next cron interval
-
 * when the task is complete, exits with value set to the task exit status
-
 * periodically retries the job if it exits non-0
-
 * if the tasks succeeds (exits 0), when restarted, sleeps until the next
   cron interval
-
 * terminates any background subprocesses when the foreground process exits
-
 * attempts to prevent running unkillable (setuid) subprocesses
-
 * standard input is forwarded to the task
 
 cron expressions are parsed using
