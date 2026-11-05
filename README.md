@@ -104,9 +104,9 @@ offset:
 0 0~8 * * 1~5
 ```
 
-The random offset is predictable, using the system hostname as the seed
-by default. Use the `-t` option to change the seed or set it to an empty
-string ("") to use the current time as the seed.
+The random offset is predictable and by default is seeded using the
+system hostname. The `-t` option can be used to set the seed. An empty
+string ("") uses the current time as the seed.
 
 ```bash
 # runs: Tuesday at 7am
