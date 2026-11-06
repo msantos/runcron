@@ -178,11 +178,10 @@ exec runcron "15 8 * * *" echo Running job
 : change working directory before running command
 
 -T, --timeout
-: specify command timeout in seconds (-1 to disable, default: next
-cron interval)
+: specify command timeout in seconds (-1 to disable, default: next cron interval)
 
 -R, --retry-interval
-: interval to retry failed commands (default: 3600s)
+: interval to retry failed commands (default: 3600 seconds)
 
 -n, --dryrun
 : do nothing
