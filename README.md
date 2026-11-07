@@ -54,7 +54,7 @@ are supported. The seconds field is optional:
 			day of week    0-7 (0 or 7 is Sun, or use names)
 ```
 
-crontab(5) aliases pseudorandomly assign a run time from the alias
+[crontab(5)](https://man7.org/linux/man-pages/man5/crontab.5.html) aliases pseudorandomly assign a run time from the alias
 interval. To run exactly at the start of the interval, use the "="
 alias variant:
 
