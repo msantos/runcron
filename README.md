@@ -54,31 +54,29 @@ are supported. The seconds field is optional:
 			day of week    0-7 (0 or 7 is Sun, or use names)
 ```
 
-[crontab(5)](https://man7.org/linux/man-pages/man5/crontab.5.html) aliases pseudorandomly assign a run time from the alias
-interval. To run exactly at the start of the interval, use the "="
-alias variant:
+[crontab(5)](https://man7.org/linux/man-pages/man5/crontab.5.html)
+aliases pseudorandomly assign a run time from the alias interval. To
+run exactly at the start of the interval, use the "=" alias variant:
 
-```
-			string         meaning
-			------         -------
-			@reboot        Run once, at startup (see below).
-			@yearly        Run once a year, "0~59 0~59 0~23 1~28 1~12 *".
-			@annually      (same as @yearly)
-			@monthly       Run once a month, "0~59 0~59 0~23 1~28 * *".
-			@weekly        Run once a week, "0~59 0~59 0~23 * * 1~7".
-			@daily         Run once a day, "0~59 0~59 0~23 * * *".
-			@midnight      (same as =daily)
-			@hourly        Run once an hour, "0~59 0~59 * * * *".
-
-			=reboot        (same as @reboot)
-			=yearly        Run once a year, "0 0 1 1 *".
-			=annually      (same as =yearly)
-			=monthly       Run once a month, "0 0 1 * *".
-			=weekly        Run once a week, "0 0 * * 0".
-			=daily         Run once a day, "0 0 * * *".
-			=midnight      (same as =daily)
-			=hourly        Run once an hour, "0 * * * *".
-```
+| Alias     | Description                                    |
+|-----------|------------------------------------------------|
+| @reboot   | Run once, at startup (see below).              |
+| @yearly   | Run once a year, `0~59 0~59 0~23 1~28 1~12 *`. |
+| @annually | (same as @yearly)                              |
+| @monthly  | Run once a month, `0~59 0~59 0~23 1~28 * *`.   |
+| @weekly   | Run once a week, `0~59 0~59 0~23 * * 1~7`.     |
+| @daily    | Run once a day, `0~59 0~59 0~23 * * *`.        |
+| @midnight | (same as =daily)                               |
+| @hourly   | Run once an hour, `0~59 0~59 * * * *`.         |
+|           |                                                |
+| =reboot   | (same as @reboot)                              |
+| =yearly   | Run once a year, `0 0 1 1 *`.                  |
+| =annually | (same as =yearly)                              |
+| =monthly  | Run once a month, `0 0 1 * *`.                 |
+| =weekly   | Run once a week, `0 0 * * 0`.                  |
+| =daily    | Run once a day, `0 0 * * *`.                   |
+| =midnight | (same as =daily)                               |
+| =hourly   | Run once an hour, `0 * * * *`.                 |
 
 ## Handling stdin
 
