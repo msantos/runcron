@@ -43,16 +43,14 @@ cron expressions are parsed using
 The standard crontab(5) expressions (and some additional expressions)
 are supported. The seconds field is optional:
 
-```
-			field          allowed values
-			-----          --------------
-			second         0-59 (optional)
-			minute         0-59
-			hour           0-23
-			day of month   1-31
-			month          1-12 (or names, see below)
-			day of week    0-7 (0 or 7 is Sun, or use names)
-```
+| Field        | Allowed Values                    |
+|--------------|-----------------------------------|
+| second       | 0-59 (optional)                   |
+| minute       | 0-59                              |
+| hour         | 0-23                              |
+| day of month | 1-31                              |
+| month        | 1-12 (or names, see below)        |
+| day of week  | 0-7 (0 or 7 is Sun, or use names) |
 
 [crontab(5)](https://man7.org/linux/man-pages/man5/crontab.5.html)
 aliases pseudorandomly assign a run time from the alias interval. To
