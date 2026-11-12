@@ -54,7 +54,7 @@ are supported. The seconds field is optional:
 
 [crontab(5)](https://man7.org/linux/man-pages/man5/crontab.5.html)
 aliases pseudorandomly assign a run time from the alias interval. To
-run exactly at the start of the interval, use the "=" alias variant:
+run exactly at the start of the interval, use the `=` alias variant:
 
 | Alias       | Description                                    |
 |-------------|------------------------------------------------|
